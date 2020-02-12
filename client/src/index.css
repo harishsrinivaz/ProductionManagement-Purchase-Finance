@@ -1,0 +1,12 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto:400,700|Material+Icons');
+@import url('https://fonts.googleapis.com/css?family=Rajdhani&display=swap');
+body {
+   margin: 0;
+}
+* {
+   font-family: 'Rajdhani';
+}
+.MuiTable-root{
+   white-space: pre-wrap;
+   word-wrap: break-word;
+ }

@@ -1,0 +1,14 @@
+.App {
+   text-align: center;
+}
+
+body,
+html {
+   overflow-y: auto;
+}
+
+/* .Menu:hover {
+   border-left:20px solid rgb(190, 190, 190);
+   background-color: rgb(250, 250, 250);
+   cursor: pointer;
+} */
