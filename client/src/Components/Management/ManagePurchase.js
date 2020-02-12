@@ -24,7 +24,7 @@ export default class ManagePurchase extends Component {
          childbtnDisplay: 'none',
          fieldData: [],
          action: '',
-         addIcon: false
+         addIcon: false,
       };
       this.handler = this.handler.bind(this);
    }
@@ -34,6 +34,7 @@ export default class ManagePurchase extends Component {
       })
       this.componentDidMount();
    }
+
    callDetails() {
       Axios.get('/home')
          .then(res => res.data)
@@ -45,16 +46,11 @@ export default class ManagePurchase extends Component {
    close() {
       this.setState({ open: false })
    }
-   // setValue(event, rowData) {
-   //    console.log(rowData)
-   //    this.setState({ fieldData: rowData })
-   // }
+
    componentDidMount() {
       this.callDetails();
-      if (this.state.data.Vendor === " ") {
-         console.log('Vendor mt')
-      }
    }
+
    render() {
       return (
          <Box

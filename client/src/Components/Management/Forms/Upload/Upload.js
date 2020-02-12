@@ -23,7 +23,7 @@ const Upload = (props) => {
    });
 
    useEffect(() => {
-      if (props.action === 'Edit' && props.url[0] !== " ") {
+      if (props.action === 'Edit' && props.url.length !== 0) {
          setState(state => ({
             ...state,
             fileList: props.url,
@@ -64,7 +64,6 @@ const Upload = (props) => {
          });
       }
       console.log('File Added...' + state.fileList);
-
    };
    const xtraFile = () => {
       addfile = state.fileList;
