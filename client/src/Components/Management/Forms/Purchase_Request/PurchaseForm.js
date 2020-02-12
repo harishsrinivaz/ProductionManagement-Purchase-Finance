@@ -56,7 +56,7 @@ const PurchaseForm = (props) => {
             quotationURL: props.data.Quotation_Document_URL
          }))
       }
-      props.handler();
+      props.handler(props.data);
    }
    const onSubmit = () => {
       console.log('onSubmit: ', state.reqDetails)
@@ -82,7 +82,7 @@ const PurchaseForm = (props) => {
                quotationURL: qURL
             }
          }).then(console.log("Updated: ", state.reqDetails, qURL),
-            props.handler()
+            props.handler(props.data)
          )
       }
    }

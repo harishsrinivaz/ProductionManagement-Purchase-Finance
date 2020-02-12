@@ -67,7 +67,7 @@ app.post('/home', (req, res) => {
         var qURL = req.body.Edit.quotationURL;
         var quantity = req.body.Edit.quantity;
         var munit = req.body.Edit.munit;
-        reqDetails.findOneAndUpdate(
+        reqDetails.findByIdAndUpdate(
             {
                 _id: _Id
             },
@@ -79,12 +79,28 @@ app.post('/home', (req, res) => {
                     Total_Price: amount,
                     Quotation_Document_URL: qURL
                 }
-            }, function (err) {
+            }, { useFindAndModify: false }, function (err) {
                 if (err) { throw err }
                 else {
                     console.log("_id:", _Id, " vendor: ", vendor, " amount: ", amount,
                         "quotationURL: ", qURL)
                 }
+            })
+    }
+
+    if (req.body.Status) {
+        var _Id = req.body.Status._id;
+        var status = req.body.Status.status;
+        console.log("Status: ", status)
+        reqDetails.findByIdAndUpdate({ _id: _Id },
+            {
+                $set: {
+                    Status: status
+                }
+
+            }, { useFindAndModify: false }, function (err) {
+                if (err) { throw err }
+                else { console.log(status) }
             })
     }
 

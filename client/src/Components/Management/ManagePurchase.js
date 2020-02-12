@@ -28,10 +28,19 @@ export default class ManagePurchase extends Component {
       };
       this.handler = this.handler.bind(this);
    }
-   handler() {
+   handler(row) {
       this.setState({
          open: false,
       })
+      console.log(row);
+      if (row.Status === "Requesting") {
+         Axios.post('/home', {
+            Status: {
+               _id: row._id,
+               status: "Processing"
+            }
+         })
+      }
       this.componentDidMount();
    }
 
