@@ -1,4 +1,4 @@
-import React, { useState, Component } from 'react';
+import React, { Component } from 'react';
 import { Box, TextField, Button, Paper } from '@material-ui/core';
 import AccountBoxIcon from '@material-ui/icons/AccountBoxTwoTone';
 import LockIcon from '@material-ui/icons/LockTwoTone';

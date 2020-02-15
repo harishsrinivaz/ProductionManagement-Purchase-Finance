@@ -55,10 +55,16 @@ app.get('/home', (req, res) => {
 app.post('/home', (req, res) => {
     if (req.body.deleteID) {
         var deleteID = req.body.deleteID;
-        reqDetails.findById(deleteID).deleteOne(function (err) {
-            if (err) { throw err }
-            else { console.log("Document " + deleteID + " is deleted") }
-        })
+        reqDetails.findByIdAndUpdate({ _id: deleteID },
+            {
+                $set: {
+                    Status: "Rejected"
+                }
+            }, { useFindAndModify: false },
+            function (err) {
+                if (err) { throw err }
+                else { console.log("Document " + deleteID + " is rejected") }
+            })
     }
     if (req.body.Edit) {
         var _Id = req.body.Edit._id;

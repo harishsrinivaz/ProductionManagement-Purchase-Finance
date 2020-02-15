@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, TextField, Select, MenuItem, Button, Divider, FormControl, InputLabel } from '@material-ui/core';
+import { Box, TextField, Select, MenuItem, Button, FormControl, InputLabel } from '@material-ui/core';
 import useStyles from './PurchaseFormstyles';
 import UploadBtn from '../Upload/Upload';
 import { Datepick } from '../Date/Datepick';
@@ -56,7 +56,7 @@ const PurchaseForm = (props) => {
             quotationURL: props.data.Quotation_Document_URL
          }))
       }
-      props.handler(props.data);
+      props.handler(props.data, 0);
    }
    const onSubmit = () => {
       console.log('onSubmit: ', state.reqDetails)
@@ -82,7 +82,7 @@ const PurchaseForm = (props) => {
                quotationURL: qURL
             }
          }).then(console.log("Updated: ", state.reqDetails, qURL),
-            props.handler(props.data)
+            props.handler(props.data, 1)
          )
       }
    }
