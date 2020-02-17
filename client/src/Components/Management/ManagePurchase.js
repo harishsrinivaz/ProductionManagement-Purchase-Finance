@@ -48,7 +48,7 @@ export default class ManagePurchase extends Component {
    }
 
    callDetails() {
-      Axios.get('/home')
+      Axios.get('/request_details')
          .then(res => res.data)
          .then(data => {
             var items = data;
@@ -109,7 +109,7 @@ export default class ManagePurchase extends Component {
                         if (oldData.Status === 'Requesting') {
                            this.setState(prevState => {
                               const data = [...prevState.data];
-                              Axios.post('/home', { deleteID: data[data.indexOf(oldData)]._id })
+                              Axios.post('/reqDetails', { deleteID: data[data.indexOf(oldData)]._id })
                                  .then(this.componentDidMount())
                               return { ...prevState, data };
                            });

@@ -17,7 +17,6 @@ export default function Dashboard(props) {
          color: '#3f51b5'
       }
    };
-   //   console.log(props.items);
    return (
       <Box display='flex'>
          <Box component='div' className={classes.boxOutProp}>

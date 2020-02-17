@@ -3,18 +3,25 @@ import { Box } from '@material-ui/core';
 import Dashboard from '../Dashboard/Dashboard';
 import PurchaseForm from './Forms/Purchase_Request/PurchaseForm'
 import ManagePurchase from './ManagePurchase';
+import ProtectedRoute from '../Auth/ProtectedRoute';
 import { Route } from 'react-router';
 
-const Management = () => {
-   const dashboardList = [
-      { Name: 'Manage Purchase', Path: 'manage-purchase' },
+const Management = (props) => {
+   var dashboardList = [];
+   const purchaseDept = [
+      { Name: 'Manage Purchase', Path: `manage-purchase` },
       { Name: 'Manage Stock', Path: 'manage-stock' },
       { Name: 'Manage Wastage', Path: 'manage-wastage' },
       { Name: 'Logout', Path: 'login' }
    ];
+   const financeDept = [
+      { Name: 'Manage Finance', Path: 'manage-finance' },
+      { Name: 'Logout', Path: 'login' }
+   ];
+
    return (
       <Box display='flex' height='100vh'>
-         <Dashboard items={dashboardList} componentName='management' />
+         <Dashboard items={purchaseDept} componentName={`management`} />
          <Box
             display='flex'
             flexDirection='column'
@@ -23,17 +30,18 @@ const Management = () => {
             marginTop='20px'
             justifyContent='center'
          >
-            <Route
+            <ProtectedRoute
                exact
                path='/management/manage-purchase'
                component={ManagePurchase}
             />
-            <Route
+            <ProtectedRoute
                path='/management/manage-purchase/add-purchase'
                component={PurchaseForm}
             />
          </Box>
       </Box>
+      //) : <h3 style={{ textAlign: 'center' }}>Cannot be access this page without login</h3>
    );
 };
 

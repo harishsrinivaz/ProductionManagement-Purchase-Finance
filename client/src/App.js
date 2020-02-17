@@ -3,6 +3,7 @@ import './App.css';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import Login from './Components/Login/Login';
 import Management from './Components/Management/Management';
+import ProtectedRoute from './Components/Auth/ProtectedRoute';
 import { Box } from '@material-ui/core';
 
 class App extends Component {
@@ -11,7 +12,7 @@ class App extends Component {
          <Box>
             < Router >
                <Route exact path='/' component={Login} />
-               <Route path='/management' component={Management} />
+               <ProtectedRoute path='/management' component={Management} />
             </Router >
          </Box >
       );
