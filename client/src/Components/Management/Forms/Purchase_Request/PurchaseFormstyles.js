@@ -48,7 +48,7 @@ const useStyles = makeStyles({
       paddingTop: '10px',
       paddingLeft: '75px',
       paddingRight: '75px',
-      paddingBottom: '10px'
+      paddingBottom: '30px'
    },
 
    iconBtn: {

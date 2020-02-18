@@ -118,7 +118,7 @@ const Upload = (props) => {
    };
 
    return (
-      <Box display='flex' onChange={props.setDocUrl(state.fileList)}>
+      <Box display='flex' onChange={props.setDocUrl(state.fileList)} width='100%'>
          <Box>
             {fileInput}
             <label htmlFor='#file'>

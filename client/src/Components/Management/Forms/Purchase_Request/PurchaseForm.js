@@ -282,7 +282,7 @@ const PurchaseForm = (props) => {
                variant='outlined'
                size='small'
                required
-               style={{ marginLeft: '20px', width: "40%" }}
+               style={{ marginLeft: '20px', width: "100%" }}
             >
                <InputLabel
                   style={{ backgroundColor: 'white', padding: "0 5px" }}
