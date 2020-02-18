@@ -81,7 +81,7 @@ const Upload = (props) => {
    let fileInput = (
       <input
          style={{ display: 'none' }}
-         accept='/*'
+         accept='image/*, application/pdf'
          id='#file'
          multiple
          type='file'

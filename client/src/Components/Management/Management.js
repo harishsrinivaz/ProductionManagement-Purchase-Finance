@@ -1,10 +1,9 @@
 import React from 'react';
-import { Box } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import Dashboard from '../Dashboard/Dashboard';
-import PurchaseForm from './Forms/Purchase_Request/PurchaseForm'
 import ManagePurchase from './ManagePurchase';
 import ProtectedRoute from '../Auth/ProtectedRoute';
-import { Route } from 'react-router';
+import auth from '../Auth/auth';
 
 const Management = (props) => {
    var dashboardList = [];
@@ -12,11 +11,9 @@ const Management = (props) => {
       { Name: 'Manage Purchase', Path: `manage-purchase` },
       { Name: 'Manage Stock', Path: 'manage-stock' },
       { Name: 'Manage Wastage', Path: 'manage-wastage' },
-      { Name: 'Logout', Path: 'login' }
    ];
    const financeDept = [
       { Name: 'Manage Finance', Path: 'manage-finance' },
-      { Name: 'Logout', Path: 'login' }
    ];
 
    return (
@@ -35,13 +32,27 @@ const Management = (props) => {
                path='/management/manage-purchase'
                component={ManagePurchase}
             />
-            <ProtectedRoute
-               path='/management/manage-purchase/add-purchase'
-               component={PurchaseForm}
-            />
+         </Box>
+         <Box
+            position='absolute'
+            left='91%'
+            top='3%'
+         >
+            <Button
+               size='large'
+               variant='contained'
+               color='primary'
+               style={{ fontWeight: 'bold' }}
+               onClick={() => {
+                  if (auth.logout()) {
+                     props.history.push('/');
+                  }
+               }}
+            >
+               Logout
+            </Button>
          </Box>
       </Box>
-      //) : <h3 style={{ textAlign: 'center' }}>Cannot be access this page without login</h3>
    );
 };
 

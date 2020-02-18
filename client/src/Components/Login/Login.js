@@ -94,6 +94,7 @@ class Login extends Component {
                                     auth.login(
                                        res.data.name === this.state.user_name
                                     );
+                                    console.log(res.data.role)
                                     axios
                                        .post('roles/role', {
                                           _id: res.data.role
@@ -148,7 +149,6 @@ class Login extends Component {
                            bgcolor='#f73067'
                            marginTop='10px'
                            padding='10px'
-                           fullWidth
                            textAlign='center'
                         >
                            {error}

@@ -31,6 +31,7 @@ router.post('/', (req, res) => {
         var qURL = req.body.Edit.quotationURL;
         var quantity = req.body.Edit.quantity;
         var munit = req.body.Edit.munit;
+        var status = req.body.Edit.status;
         reqDetails.findByIdAndUpdate(
             {
                 _id: _Id
@@ -41,13 +42,14 @@ router.post('/', (req, res) => {
                     Measuring_Unit: munit,
                     Vendor: vendor,
                     Total_Price: amount,
-                    Quotation_Document_URL: qURL
+                    Quotation_Document_URL: qURL,
+                    Status: status
                 }
             }, { useFindAndModify: false }, function (err) {
                 if (err) { throw err }
                 else {
                     console.log("_id:", _Id, " vendor: ", vendor, " amount: ", amount,
-                        "quotationURL: ", qURL)
+                        "quotationURL: ", qURL, " status: ", status)
                 }
             })
     }

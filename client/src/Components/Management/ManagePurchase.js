@@ -70,17 +70,20 @@ export default class ManagePurchase extends Component {
    render() {
       return (
          <Box
-            width='85%'
+            width='95%'
             display='flex'
             alignItems='center'
+            justifyContent='center'
             flexDirection='column'
             height='100vh'
+            m={0}
          >
-            <Box m={2} fontSize={2 + 'vw'} fontWeight='bold'>
+            <Box mb={2} fontSize={2 + 'vw'} fontWeight='bold'>
                Request Details
             </Box>
             <MaterialTable
                title=''
+               height
                fullWidth
                columns={this.state.columns}
                data={this.state.data}
@@ -109,7 +112,7 @@ export default class ManagePurchase extends Component {
                         if (oldData.Status === 'Requesting') {
                            this.setState(prevState => {
                               const data = [...prevState.data];
-                              Axios.post('/reqDetails', { deleteID: data[data.indexOf(oldData)]._id })
+                              Axios.post('/request_details', { deleteID: data[data.indexOf(oldData)]._id })
                                  .then(this.componentDidMount())
                               return { ...prevState, data };
                            });

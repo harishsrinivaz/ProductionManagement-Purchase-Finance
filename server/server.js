@@ -17,5 +17,6 @@ app.use(express.json())
 app.use('/request_details', require('./Routes/ReqDetailsRoute'))
 app.use('/users', require('./Routes/UsersRoute'))
 app.use('/roles', require('./Routes/RolesRoute'))
+app.use('/raw_materials', require('./Routes/RawMaterialsRoute'))
 
 app.listen(PORT, () => { console.log('Server running...') })

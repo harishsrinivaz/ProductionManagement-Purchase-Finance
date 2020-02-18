@@ -10,14 +10,14 @@ const style = {
 };
 const PurchaseForm = (props) => {
    const classes = useStyles();
-
    const [state, setState] = useState({
       reqDetails: {
          quantity: 0,
          munit: 'Measuring Unit',
          vendor: 'Vendor',
          amount: 0,
-         quotationURL: []
+         quotationURL: [],
+         status: 'Status'
       }
    })
    useEffect(() => {
@@ -29,7 +29,8 @@ const PurchaseForm = (props) => {
                munit: props.data.Measuring_Unit,
                vendor: props.data.Vendor,
                amount: props.data.Total_Price,
-               quotationURL: props.data.Quotation_Document_URL
+               quotationURL: props.data.Quotation_Document_URL,
+               status: props.data.Status
             }
          }))
          console.log('Edit working...')
@@ -53,7 +54,8 @@ const PurchaseForm = (props) => {
             munit: props.data.Measuring_Unit,
             amount: props.data.Total_Price,
             vendor: props.data.Vendor,
-            quotationURL: props.data.Quotation_Document_URL
+            quotationURL: props.data.Quotation_Document_URL,
+            status: props.data.Status
          }))
       }
       props.handler(props.data, 0);
@@ -72,14 +74,15 @@ const PurchaseForm = (props) => {
          }))
       }
       else {
-         Axios.post('/home', {
+         Axios.post('/request_details', {
             Edit: {
                _id: props.data._id,
                quantity: state.reqDetails.quantity,
                munit: state.reqDetails.munit,
                vendor: state.reqDetails.vendor,
                amount: state.reqDetails.amount,
-               quotationURL: qURL
+               quotationURL: qURL,
+               status: state.reqDetails.status
             }
          }).then(console.log("Updated: ", state.reqDetails, qURL),
             props.handler(props.data, 1)
@@ -96,7 +99,9 @@ const PurchaseForm = (props) => {
             vendor: event.target.name === 'vendor' ? event.target.value
                : document.getElementsByName('vendor')[0].value,
             amount: event.target.name === 'amount' ? event.target.value
-               : document.getElementsByName('amount')[0].value
+               : document.getElementsByName('amount')[0].value,
+            status: event.target.name === 'status' ? event.target.value
+               : document.getElementsByName('status')[0].value
          }
       })
    }
@@ -129,7 +134,7 @@ const PurchaseForm = (props) => {
                >
                   <MenuItem value='Raw Material Name' disabled>
                      Raw Material Name
-               </MenuItem>
+                  </MenuItem>
                   <MenuItem value='Apple'>Apple</MenuItem>
                   <MenuItem value='Mango'>Mango</MenuItem>
                   <MenuItem value='Orange'>Orange</MenuItem>
@@ -272,6 +277,36 @@ const PurchaseForm = (props) => {
                action={props.action}
                setDocUrl={childState}
             />
+
+            <FormControl
+               variant='outlined'
+               size='small'
+               required
+               style={{ marginLeft: '20px', width: "40%" }}
+            >
+               <InputLabel
+                  style={{ backgroundColor: 'white', padding: "0 5px" }}
+               >
+                  Status
+               </InputLabel>
+               <Select
+                  name='status'
+                  fullWidth
+                  variant='outlined'
+                  value={state.reqDetails.status}
+                  required
+                  onChange={(event) => setValue(event)}
+               >
+                  <MenuItem value='Status' disabled>
+                     Status
+                  </MenuItem>
+                  <MenuItem value='Requesting'>Requesting</MenuItem>
+                  <MenuItem value='Processing'>Processing</MenuItem>
+                  <MenuItem value='ForwardedToAdmin'>ForwardedToAdmin</MenuItem>
+                  <MenuItem value='ForwardedToFinance'>ForwardedToFinance</MenuItem>
+                  <MenuItem value='Rejected'>Rejected</MenuItem>
+               </Select>
+            </FormControl>
          </Box>
       </Box >
    );
