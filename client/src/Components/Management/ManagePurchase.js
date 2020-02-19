@@ -13,7 +13,7 @@ export default class ManagePurchase extends Component {
             { title: 'Material Name', field: 'Raw_Material_Name' },
             { title: 'Quantity', field: 'Quantity' },
             { title: 'Unit', field: 'Measuring_Unit' },
-            { title: 'Vendor', field: 'Vendor' },
+            { title: 'Vendor', field: 'Vendor_Name' },
             { title: 'Total Price', field: 'Total_Price' },
             { title: 'Quotation Document', field: 'Quotation_Document_URL' },
             { title: 'Status', field: 'Status' }
@@ -26,34 +26,69 @@ export default class ManagePurchase extends Component {
          fieldData: [],
          action: '',
          addIcon: false,
-         alert: false
+         alert: false,
       };
       this.closeAlert = this.closeAlert.bind(this);
       this.handler = this.handler.bind(this);
+      this.items = [];
    }
-   handler(row, ch) {
+   handler() {
       this.setState({
          open: false,
       })
-      console.log(row, ch);
-      if (row.Status === "Requesting" && ch === 1) {
-         Axios.post('/home', {
-            Status: {
-               _id: row._id,
-               status: "Processing"
-            }
-         })
-      }
-      this.componentDidMount();
+      this.callDetails();
    }
-
    callDetails() {
+      // Axios.get('/request_details')
+      //    .then(res => res.data)
+      //    .then(data => {
+      //       this.items = data;
+      //       this.items.map((item, index) => {
+      //          Axios.get('/vendors')
+      //             .then(vendor => {
+      //                var vendorsList = vendor.data.Vendors;
+      //                console.log('Items: ', this.items)
+      //                vendorsList.map(vendor => {
+      //                   if (vendor._id === item.Vendor) {
+      //                      console.log(vendor.vendor_name)
+      //                      this.items[index].Vendor = vendor.vendor_name
+      //                   }
+      //                })
+      //             })
+      //       })
+      //       this.setState({ data: this.items },
+      //          () => { console.log("Data:", this.state.data) })
+      //    })
+      let req = [];
       Axios.get('/request_details')
          .then(res => res.data)
-         .then(data => {
-            var items = data;
-            this.setState({ data: items })
-         })
+         .then(RequestDetails => {
+            //if (this.props.load) {
+            RequestDetails.map(RequestDetail => {
+               //if (RequestDetail.Status === 'ForwardedToAdmin') {
+               console.log('hello');
+               Axios.post('/vendors', {
+                  _id: RequestDetail.Vendor
+               })
+                  .then(res => {
+                     RequestDetail.Vendor_Name =
+                        res.data.Vendor[0].vendor_name;
+                     req.push(RequestDetail);
+                     console.log(req);
+                     this.setState({
+                        data: [...req]
+                     });
+                  })
+                  .catch(err => {
+                     RequestDetail.Vendor = 'Problem loading vendor';
+                     req.push(RequestDetail);
+                     console.log(req);
+                     this.setState({
+                        data: [...req]
+                     });
+                  });
+            });
+         });
    }
 
    close() {
@@ -105,22 +140,22 @@ export default class ManagePurchase extends Component {
                         }
                      }
                   },
-                  oldData => ({
-                     icon: 'cancel',
-                     tooltip: 'Reject',
-                     onClick: (event, oldData) => {
-                        if (oldData.Status === 'Requesting') {
-                           this.setState(prevState => {
-                              const data = [...prevState.data];
-                              Axios.post('/request_details', { deleteID: data[data.indexOf(oldData)]._id })
-                                 .then(this.componentDidMount())
-                              return { ...prevState, data };
-                           });
-                        } else {
-                           this.setState({ alert: true })
-                        }
-                     }
-                  })
+                  // oldData => ({
+                  //    icon: 'cancel',
+                  //    tooltip: 'Reject',
+                  //    onClick: (event, oldData) => {
+                  //       if (oldData.Status === 'Requesting') {
+                  //          this.setState(prevState => {
+                  //             const data = [...prevState.data];
+                  //             Axios.post('/request_details', { deleteID: data[data.indexOf(oldData)]._id })
+                  //                .then(this.componentDidMount())
+                  //             return { ...prevState, data };
+                  //          });
+                  //       } else {
+                  //          this.setState({ alert: true })
+                  //       }
+                  //    }
+                  // })
                ]}
                // editable={{
                //    onRowDelete: oldData =>

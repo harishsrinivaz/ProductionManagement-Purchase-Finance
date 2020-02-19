@@ -18,5 +18,6 @@ app.use('/request_details', require('./Routes/ReqDetailsRoute'))
 app.use('/users', require('./Routes/UsersRoute'))
 app.use('/roles', require('./Routes/RolesRoute'))
 app.use('/raw_materials', require('./Routes/RawMaterialsRoute'))
+app.use('/vendors', require('./Routes/VendorsRoute'))
 
 app.listen(PORT, () => { console.log('Server running...') })

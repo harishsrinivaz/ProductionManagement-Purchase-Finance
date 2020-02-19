@@ -11,16 +11,22 @@ const style = {
 const PurchaseForm = (props) => {
    const classes = useStyles();
    const [state, setState] = useState({
+      vendorsList: [],
       reqDetails: {
-         quantity: 0,
-         munit: 'Measuring Unit',
-         vendor: 'Vendor',
-         amount: 0,
-         quotationURL: [],
-         status: 'Status'
+         quantity: props.data.Quantity,
+         munit: props.data.Measuring_Unit,
+         vendor: props.data.Vendor,
+         amount: props.data.Total_Price,
+         quotationURL: props.data.Quotation_Document_URL,
+         status: props.data.Status
       }
    })
    useEffect(() => {
+      Axios.get('/vendors')
+         .then(res => {
+            setState({ ...state, vendorsList: res.data.Vendors })
+            console.log(state.vendorsList)
+         })
       if (props.action === 'Edit') {
          setState(state => ({
             ...state,
@@ -58,7 +64,7 @@ const PurchaseForm = (props) => {
             status: props.data.Status
          }))
       }
-      props.handler(props.data, 0);
+      props.handler();
    }
    const onSubmit = () => {
       console.log('onSubmit: ', state.reqDetails)
@@ -85,12 +91,13 @@ const PurchaseForm = (props) => {
                status: state.reqDetails.status
             }
          }).then(console.log("Updated: ", state.reqDetails, qURL),
-            props.handler(props.data, 1)
+            props.handler()
          )
       }
    }
    const setValue = (event) => {
       setState({
+         ...state,
          reqDetails: {
             quantity: event.target.name === 'quantity' ? event.target.value
                : document.getElementsByName('quantity')[0].value,
@@ -105,6 +112,15 @@ const PurchaseForm = (props) => {
          }
       })
    }
+
+   const loadVendors = () => {
+      return (
+         state.vendorsList.map((person, index) => (
+            <MenuItem value={person._id}>{person.vendor_name}</MenuItem>
+
+         )))
+   }
+
    const Form = (
       <Box className={classes.form}>
          <Box className={classes.boxSize2}>
@@ -217,10 +233,8 @@ const PurchaseForm = (props) => {
                >
                   <MenuItem value='Vendor' disabled selected>
                      Vendor
-               </MenuItem>
-                  <MenuItem value='ABC'>ABC</MenuItem>
-                  <MenuItem value='XYZ'>XYZ</MenuItem>
-                  <MenuItem value='PQR'>PQR</MenuItem>
+                  </MenuItem>
+                  {loadVendors()}
                </Select>
             </FormControl>
 
@@ -300,7 +314,7 @@ const PurchaseForm = (props) => {
                   <MenuItem value='Status' disabled>
                      Status
                   </MenuItem>
-                  <MenuItem value='Requesting'>Requesting</MenuItem>
+                  <MenuItem value='Requesting' disabled>Requesting</MenuItem>
                   <MenuItem value='Processing'>Processing</MenuItem>
                   <MenuItem value='ForwardedToAdmin'>ForwardedToAdmin</MenuItem>
                   <MenuItem value='ForwardedToFinance'>ForwardedToFinance</MenuItem>
