@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Box } from '@material-ui/core';
 import useStyles from '../Purchase_Request/PurchaseFormstyles';
-import { Button, Typography, Fab } from '@material-ui/core';
+import { Button, Fab } from '@material-ui/core';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ProtectedRoute from '../../../Auth/ProtectedRoute'
 import { Link as RefLink } from 'react-router-dom'
+
 const Upload = (props) => {
    const classes = useStyles();
    const [state, setState] = useState({
@@ -25,7 +26,7 @@ const Upload = (props) => {
    });
 
    useEffect(() => {
-      if (props.action === 'Edit' && props.url.length !== 0) {
+      if (props.url.length !== 0) {
          setState(state => ({
             ...state,
             fileList: props.url,
@@ -39,7 +40,7 @@ const Upload = (props) => {
          }))
          console.log('Uploading...')
       }
-   }, [props.action, props.url])
+   }, [props])
 
    let addfile = [];
    const addFile = (event) => {
@@ -137,11 +138,12 @@ const Upload = (props) => {
                   style={{ textDecoration: 'none', color: 'black' }}
                >
                   {file}
-                  {console.log('File: ', file)}
+                  {/* {console.log('File: ', file)} */}
                </RefLink>
                <ProtectedRoute path='document' component={tempFile} />
             </Box>
             )
+            return true
          }
          )
          return store;

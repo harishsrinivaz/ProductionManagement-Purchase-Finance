@@ -38,7 +38,7 @@ export default class ManagePurchase extends Component {
                                         style={{ textDecoration: 'none', color: 'black' }}
                                     >
                                         {file}
-                                        {console.log('File: ', file)}
+                                        {/* {console.log('File: ', file)} */}
                                     </RefLink>
                                     <ProtectedRoute path='document' component={tempFile} />
                                 </Box>
@@ -53,15 +53,20 @@ export default class ManagePurchase extends Component {
                 { title: 'Status', field: 'Status' }
             ],
             data: [],
-            open: false,
+            openDialog: false,
             heading: '',
             visible: 'none',
             childbtnDisplay: 'none',
             fieldData: [],
             action: '',
-            addIcon: false,
             alert: false,
-            formDisabled: false,
+            formDisabled: {
+                materialQuantity: false,
+                materialUnit: false,
+                vendor: false,
+                amount: false,
+                status: false
+            },
             btnName: 'Cancel'
         };
         this.closeAlert = this.closeAlert.bind(this);
@@ -70,7 +75,7 @@ export default class ManagePurchase extends Component {
     }
     handler() {
         this.setState({
-            open: false,
+            openDialog: false,
         })
         this.callDetails();
     }
@@ -145,25 +150,20 @@ export default class ManagePurchase extends Component {
                             onClick: (event, rowData) => {
                                 if (rowData.Status === "ForwardedToFinance") {
                                     this.setState({
-                                        open: true,
+                                        openDialog: true,
                                         childbtnDisplay: 'flex',
                                         heading: 'Edit Request Details',
-                                        action: 'Edit',
+                                        action: 'Finance',
                                         fieldData: rowData,
-                                        visible: 'flex',
+                                        visible: 'none',
                                         btnName: 'Cancel',
-                                        formDisabled: false
-                                    })
-                                } else {
-                                    this.setState({
-                                        open: true,
-                                        formDisabled: true,
-                                        heading: 'Request Details',
-                                        childbtnDisplay: 'none',
-                                        action: 'Edit',
-                                        fieldData: rowData,
-                                        btnName: 'ok',
-                                        visible: 'none'
+                                        formDisabled: {
+                                            materialQuantity: false,
+                                            materialUnit: false,
+                                            vendor: true,
+                                            amount: true,
+                                            status: false
+                                        }
                                     })
                                 }
                             }
@@ -181,11 +181,10 @@ export default class ManagePurchase extends Component {
                         },
                         alignItems: 'space-evenly'
                     }}
-                    style={{ width: '100%', height: '73%', overflow: 'auto' }}
                 />
                 <Dialog
                     maxWidth='md'
-                    open={this.state.open}
+                    open={this.state.openDialog}
                     fullWidth
                 >
                     <Box>

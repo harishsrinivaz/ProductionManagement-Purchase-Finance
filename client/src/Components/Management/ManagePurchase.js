@@ -38,7 +38,7 @@ export default class ManagePurchase extends Component {
                               style={{ textDecoration: 'none', color: 'black' }}
                            >
                               {file}
-                              {console.log('File: ', file)}
+                              {/* {console.log('File: ', file)} */}
                            </RefLink>
                            <ProtectedRoute path='document' component={tempFile} />
                         </Box>
@@ -53,24 +53,28 @@ export default class ManagePurchase extends Component {
             { title: 'Status', field: 'Status' }
          ],
          data: [],
-         open: false,
+         openDialog: false,
          heading: '',
-         visible: 'none',
+         iconVisible: 'none',
          childbtnDisplay: 'none',
          fieldData: [],
          action: '',
-         addIcon: false,
          alert: false,
-         formDisabled: false,
+         formDisabled: {
+            materialQuantity: false,
+            materialUnit: false,
+            vendor: false,
+            amount: false,
+            status: false
+         },
          btnName: 'Cancel'
       };
       this.closeAlert = this.closeAlert.bind(this);
       this.handler = this.handler.bind(this);
-      this.items = [];
    }
    handler() {
       this.setState({
-         open: false,
+         openDialog: false,
       })
       this.callDetails();
    }
@@ -100,12 +104,13 @@ export default class ManagePurchase extends Component {
                         data: [...req]
                      });
                   });
+               return true
             });
          });
    }
 
    close() {
-      this.setState({ open: false })
+      this.setState({ openDialog: false })
    }
    closeAlert() {
       this.setState({ alert: false })
@@ -143,25 +148,37 @@ export default class ManagePurchase extends Component {
                      onClick: (event, rowData) => {
                         if (rowData.Status === "Requesting") {
                            this.setState({
-                              open: true,
+                              openDialog: true,
                               childbtnDisplay: 'flex',
                               heading: 'Edit Request Details',
                               action: 'Edit',
                               fieldData: rowData,
-                              visible: 'flex',
+                              iconVisible: 'flex',
                               btnName: 'Cancel',
-                              formDisabled: false
+                              formDisabled: {
+                                 materialQuantity: false,
+                                 materialUnit: false,
+                                 vendor: false,
+                                 amount: false,
+                                 status: false
+                              }
                            })
                         } else {
                            this.setState({
-                              open: true,
-                              formDisabled: true,
+                              openDialog: true,
+                              formDisabled: {
+                                 materialQuantity: true,
+                                 materialUnit: true,
+                                 vendor: true,
+                                 amount: true,
+                                 status: true
+                              },
                               heading: 'Request Details',
                               childbtnDisplay: 'none',
-                              action: 'Edit',
+                              action: 'Purchase',
                               fieldData: rowData,
                               btnName: 'ok',
-                              visible: 'none'
+                              iconVisible: 'none'
                            })
                         }
                      }
@@ -179,11 +196,10 @@ export default class ManagePurchase extends Component {
                   },
                   alignItems: 'space-evenly'
                }}
-               style={{ width: '100%', height: '73%', overflow: 'auto' }}
             />
             <Dialog
                maxWidth='md'
-               open={this.state.open}
+               open={this.state.openDialog}
                fullWidth
             >
                <Box>
@@ -194,7 +210,7 @@ export default class ManagePurchase extends Component {
                      data={this.state.fieldData}
                      action={this.state.action}
                      form={this.state.formDisabled}
-                     iconVisible={this.state.visible}
+                     iconVisible={this.state.iconVisible}
                      btnName={this.state.btnName}
                   />
                </Box>

@@ -22,26 +22,15 @@ const PurchaseForm = (props) => {
       }
    })
    useEffect(() => {
-      if (props.action === 'Edit') {
+      if (props.action === 'Finance' || props.action === 'Purchase') {
          Axios.get('/vendors')
             .then(res => {
                setState({ ...state, vendorsList: res.data.Vendors })
                console.log(state.vendorsList)
             })
-         setState(state => ({
-            ...state,
-            reqDetails: {
-               quantity: props.data.Quantity,
-               munit: props.data.Measuring_Unit,
-               vendor: props.data.Vendor,
-               amount: props.data.Total_Price,
-               quotationURL: props.data.Quotation_Document_URL,
-               status: props.data.Status
-            }
-         }))
          console.log('Edit working...')
       }
-   }, [props.data, props.action]);
+   }, []);
 
    useEffect(() => {
       console.log(state.reqDetails)
@@ -115,9 +104,35 @@ const PurchaseForm = (props) => {
 
    const loadVendors = () => {
       return (
-         state.vendorsList.map((person, index) => (
-            <MenuItem key={index} value={person._id}>{person.vendor_name}</MenuItem>
+         state.vendorsList.map((vendor, index) => (
+            <MenuItem key={index} value={vendor._id}>{vendor.vendor_name}</MenuItem>
 
+         )))
+   }
+
+   const loadStatus = () => {
+      let status = [];
+      if (props.action === 'Finance') {
+         status = [
+            'ForwardedToFinance',
+            'Finance-Accepted',
+            'Finance-Rejected',
+            'ForwardedToAdmin',
+         ];
+      }
+      else {
+         status = [
+            'Requesting',
+            'ForwardedToFinance',
+            'Purchase-Delivered',
+            'Purchase-Rejected',
+            'Purchase-Inprogress',
+         ];
+      }
+      console.log('Status loaded');
+      return (
+         status.map((msg, index) => (
+            <MenuItem key={index} value={msg} disabled={(msg === 'ForwardedToFinance' && props.action === 'Finance') || msg === 'Requesting'}>{msg}</MenuItem>
          )))
    }
 
@@ -171,7 +186,7 @@ const PurchaseForm = (props) => {
 
          <Box className={classes.boxSize2}>
             <TextField
-               disabled={props.form}
+               disabled={props.form.materialQuantity}
                name='quantity'
                size='small'
                style={style}
@@ -194,7 +209,7 @@ const PurchaseForm = (props) => {
                   Measuring Unit
                </InputLabel>
                <Select
-                  disabled={props.form}
+                  disabled={props.form.materialUnit}
                   name='munit'
                   fullWidth
                   variant='outlined'
@@ -227,7 +242,7 @@ const PurchaseForm = (props) => {
                   Vendor
                </InputLabel>
                <Select
-                  disabled={props.form}
+                  disabled={props.form.vendor}
                   name='vendor'
                   variant='outlined'
                   value={state.reqDetails.vendor}
@@ -242,7 +257,7 @@ const PurchaseForm = (props) => {
             </FormControl>
 
             <TextField
-               disabled={props.form}
+               disabled={props.form.amount}
                name='amount'
                size='small'
                fullWidth
@@ -309,7 +324,7 @@ const PurchaseForm = (props) => {
                   Status
                </InputLabel>
                <Select
-                  disabled={props.form}
+                  disabled={props.form.status}
                   name='status'
                   fullWidth
                   variant='outlined'
@@ -320,11 +335,14 @@ const PurchaseForm = (props) => {
                   <MenuItem value='Status' disabled>
                      Status
                   </MenuItem>
-                  <MenuItem value='Requesting' disabled>Requesting</MenuItem>
-                  <MenuItem value='Inprogress'>Processing</MenuItem>
-                  <MenuItem value='Completed'>Completed</MenuItem>
+                  {/* <MenuItem value='Requesting' disabled>Requesting</MenuItem>
                   <MenuItem value='ForwardedToFinance'>ForwardedToFinance</MenuItem>
-                  <MenuItem value='Rejected'>Rejected</MenuItem>
+                  <MenuItem value='ForwardedToAdmin'>ForwardedToAdmin</MenuItem>
+                  <MenuItem value='Inprogress'>Inprogress</MenuItem>
+                  <MenuItem value='Accepted'>Accepted</MenuItem>
+                  <MenuItem value='Delivered'>Delivered</MenuItem>
+                  <MenuItem value='Rejected'>Rejected</MenuItem> */}
+                  {loadStatus()}
                </Select>
             </FormControl>
          </Box>
