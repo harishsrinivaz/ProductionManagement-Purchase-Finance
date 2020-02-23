@@ -22,12 +22,12 @@ const PurchaseForm = (props) => {
       }
    })
    useEffect(() => {
-      Axios.get('/vendors')
-         .then(res => {
-            setState({ ...state, vendorsList: res.data.Vendors })
-            console.log(state.vendorsList)
-         })
       if (props.action === 'Edit') {
+         Axios.get('/vendors')
+            .then(res => {
+               setState({ ...state, vendorsList: res.data.Vendors })
+               console.log(state.vendorsList)
+            })
          setState(state => ({
             ...state,
             reqDetails: {
@@ -116,7 +116,7 @@ const PurchaseForm = (props) => {
    const loadVendors = () => {
       return (
          state.vendorsList.map((person, index) => (
-            <MenuItem value={person._id}>{person.vendor_name}</MenuItem>
+            <MenuItem key={index} value={person._id}>{person.vendor_name}</MenuItem>
 
          )))
    }
@@ -171,6 +171,7 @@ const PurchaseForm = (props) => {
 
          <Box className={classes.boxSize2}>
             <TextField
+               disabled={props.form}
                name='quantity'
                size='small'
                style={style}
@@ -193,6 +194,7 @@ const PurchaseForm = (props) => {
                   Measuring Unit
                </InputLabel>
                <Select
+                  disabled={props.form}
                   name='munit'
                   fullWidth
                   variant='outlined'
@@ -225,6 +227,7 @@ const PurchaseForm = (props) => {
                   Vendor
                </InputLabel>
                <Select
+                  disabled={props.form}
                   name='vendor'
                   variant='outlined'
                   value={state.reqDetails.vendor}
@@ -239,6 +242,7 @@ const PurchaseForm = (props) => {
             </FormControl>
 
             <TextField
+               disabled={props.form}
                name='amount'
                size='small'
                fullWidth
@@ -290,6 +294,7 @@ const PurchaseForm = (props) => {
                _id={props.data._id}
                action={props.action}
                setDocUrl={childState}
+               icon={props.iconVisible}
             />
 
             <FormControl
@@ -304,6 +309,7 @@ const PurchaseForm = (props) => {
                   Status
                </InputLabel>
                <Select
+                  disabled={props.form}
                   name='status'
                   fullWidth
                   variant='outlined'
@@ -315,8 +321,8 @@ const PurchaseForm = (props) => {
                      Status
                   </MenuItem>
                   <MenuItem value='Requesting' disabled>Requesting</MenuItem>
-                  <MenuItem value='Processing'>Processing</MenuItem>
-                  <MenuItem value='ForwardedToAdmin'>ForwardedToAdmin</MenuItem>
+                  <MenuItem value='Inprogress'>Processing</MenuItem>
+                  <MenuItem value='Completed'>Completed</MenuItem>
                   <MenuItem value='ForwardedToFinance'>ForwardedToFinance</MenuItem>
                   <MenuItem value='Rejected'>Rejected</MenuItem>
                </Select>
@@ -325,21 +331,21 @@ const PurchaseForm = (props) => {
       </Box >
    );
    return (
-      <Box width="100%">
+      <Box width="100%" >
          <Box>
             <Box textAlign="center"><h1>{props.heading}</h1></Box>
             <Box className={classes.lbox}>{Form}</Box>
-            <Box display={props.btnDisplay} justifyContent='flex-end' p={0}>
-               <Box pr={2} pb={4}>
+            <Box display='flex' justifyContent='flex-end' p={0} pr={9.5}>
+               <Box pb={4}>
                   <Button
                      style={{ fontWeight: 'bold' }}
                      size='large'
                      color='primary'
                      variant='contained'
                      onClick={onCancel}
-                  >Cancel</Button>
+                  >{props.btnName}</Button>
                </Box>
-               <Box display='flex' justifyContent='flex-end' pr={9.5} pb={4}>
+               <Box display={props.btnDisplay} justifyContent='flex-end' pl={2} pb={4}>
                   <Button
                      style={{ fontWeight: 'bold' }}
                      size='large'

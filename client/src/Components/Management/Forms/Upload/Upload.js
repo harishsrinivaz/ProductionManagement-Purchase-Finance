@@ -5,6 +5,8 @@ import { Button, Typography, Fab } from '@material-ui/core';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
+import ProtectedRoute from '../../../Auth/ProtectedRoute'
+import { Link as RefLink } from 'react-router-dom'
 const Upload = (props) => {
    const classes = useStyles();
    const [state, setState] = useState({
@@ -32,7 +34,7 @@ const Upload = (props) => {
                display: 'none'
             },
             Icons: {
-               display: 'flex'
+               display: props.icon
             }
          }))
          console.log('Uploading...')
@@ -40,11 +42,10 @@ const Upload = (props) => {
    }, [props.action, props.url])
 
    let addfile = [];
-   const addFile = () => {
+   const addFile = (event) => {
       addfile = state.fileList;
-      let inputFile = '';
-      inputFile = document.getElementById('#file').value;
-      let fileName = inputFile.substring(12) + " ";
+      let inputFile = event.target.value;
+      let fileName = inputFile.substring(12);
       addfile.push(fileName);
       setState({
          fileList: addfile,
@@ -86,7 +87,8 @@ const Upload = (props) => {
          multiple
          type='file'
          disabled={state.inputDisable}
-         onChange={addFile}
+         onChange={(event) => { addFile(event) }}
+
       />
    );
    const deleteFile = () => {
@@ -114,9 +116,38 @@ const Upload = (props) => {
             }
          });
       }
+      console.log('File Deleted...' + state.fileList);
       props.setDocUrl(state.fileList);
    };
 
+   const link = () => {
+      try {
+         var store = [];
+         state.fileList.map((file, index) => {
+            var tempFile = require(`../../../../file storage/${file}`);
+            //console.log('Else: ', file);
+            store.push(<Box key={index}>
+               <RefLink
+                  to='document'
+                  target='_blank'
+                  onClick={(event) => {
+                     event.preventDefault();
+                     window.open(tempFile);
+                  }}
+                  style={{ textDecoration: 'none', color: 'black' }}
+               >
+                  {file}
+                  {console.log('File: ', file)}
+               </RefLink>
+               <ProtectedRoute path='document' component={tempFile} />
+            </Box>
+            )
+         }
+         )
+         return store;
+      }
+      catch (err) { console.log(err); return ('File not found') }
+   }
    return (
       <Box display='flex' onChange={props.setDocUrl(state.fileList)} width='100%'>
          <Box>
@@ -135,9 +166,7 @@ const Upload = (props) => {
             </label>
          </Box>
          <Box pt={1} pl={1}>
-            {state.fileList.map((files, index) => (
-               <Typography key={index} fontSize='1vw'>{files}</Typography>
-            ))}
+            {link()}
          </Box>
          <Box style={state.Icons}>
             <Box className={classes.iconBtn}>

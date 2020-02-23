@@ -4,6 +4,8 @@ import { Box, Dialog, Snackbar } from '@material-ui/core';
 import Axios from 'axios';
 import PurchaseForm from './Forms/Purchase_Request/PurchaseForm'
 import Alert from '@material-ui/lab/Alert';
+import ProtectedRoute from '../Auth/ProtectedRoute'
+import { Link as RefLink } from 'react-router-dom'
 
 export default class ManagePurchase extends Component {
    constructor(props) {
@@ -12,10 +14,42 @@ export default class ManagePurchase extends Component {
          columns: [
             { title: 'Material Name', field: 'Raw_Material_Name' },
             { title: 'Quantity', field: 'Quantity' },
-            { title: 'Unit', field: 'Measuring_Unit' },
-            { title: 'Vendor', field: 'Vendor_Name' },
+            //{ title: 'Unit', field: 'Measuring_Unit' },
+            //{ title: 'Vendor', field: 'Vendor_Name' },
             { title: 'Total Price', field: 'Total_Price' },
-            { title: 'Quotation Document', field: 'Quotation_Document_URL' },
+            {
+               title: 'Quotation Document', field: 'Quotation_Document_URL',
+               render: rowData => {
+                  var temp = rowData.Quotation_Document_URL;
+                  //console.log(`Temp: ${temp}`)
+                  try {
+                     var store = [];
+                     temp.map((file, index) => {
+                        var tempFile = require(`../../file storage/${file}`);
+                        //console.log('Else: ', file);
+                        store.push(<Box key={index}>
+                           <RefLink
+                              to='document'
+                              target='_blank'
+                              onClick={(event) => {
+                                 event.preventDefault();
+                                 window.open(tempFile);
+                              }}
+                              style={{ textDecoration: 'none', color: 'black' }}
+                           >
+                              {file}
+                              {console.log('File: ', file)}
+                           </RefLink>
+                           <ProtectedRoute path='document' component={tempFile} />
+                        </Box>
+                        )
+                     }
+                     )
+                     return store;
+                  }
+                  catch (err) { console.log(err); return ('File not found') }
+               }
+            },
             { title: 'Status', field: 'Status' }
          ],
          data: [],
@@ -27,6 +61,8 @@ export default class ManagePurchase extends Component {
          action: '',
          addIcon: false,
          alert: false,
+         formDisabled: false,
+         btnName: 'Cancel'
       };
       this.closeAlert = this.closeAlert.bind(this);
       this.handler = this.handler.bind(this);
@@ -39,34 +75,11 @@ export default class ManagePurchase extends Component {
       this.callDetails();
    }
    callDetails() {
-      // Axios.get('/request_details')
-      //    .then(res => res.data)
-      //    .then(data => {
-      //       this.items = data;
-      //       this.items.map((item, index) => {
-      //          Axios.get('/vendors')
-      //             .then(vendor => {
-      //                var vendorsList = vendor.data.Vendors;
-      //                console.log('Items: ', this.items)
-      //                vendorsList.map(vendor => {
-      //                   if (vendor._id === item.Vendor) {
-      //                      console.log(vendor.vendor_name)
-      //                      this.items[index].Vendor = vendor.vendor_name
-      //                   }
-      //                })
-      //             })
-      //       })
-      //       this.setState({ data: this.items },
-      //          () => { console.log("Data:", this.state.data) })
-      //    })
       let req = [];
       Axios.get('/request_details')
          .then(res => res.data)
          .then(RequestDetails => {
-            //if (this.props.load) {
             RequestDetails.map(RequestDetail => {
-               //if (RequestDetail.Status === 'ForwardedToAdmin') {
-               console.log('hello');
                Axios.post('/vendors', {
                   _id: RequestDetail.Vendor
                })
@@ -74,7 +87,7 @@ export default class ManagePurchase extends Component {
                      RequestDetail.Vendor_Name =
                         res.data.Vendor[0].vendor_name;
                      req.push(RequestDetail);
-                     console.log(req);
+                     //console.log(req);
                      this.setState({
                         data: [...req]
                      });
@@ -82,7 +95,7 @@ export default class ManagePurchase extends Component {
                   .catch(err => {
                      RequestDetail.Vendor = 'Problem loading vendor';
                      req.push(RequestDetail);
-                     console.log(req);
+                     //console.log(req);
                      this.setState({
                         data: [...req]
                      });
@@ -105,7 +118,7 @@ export default class ManagePurchase extends Component {
    render() {
       return (
          <Box
-            width='95%'
+            width='85%'
             display='flex'
             alignItems='center'
             justifyContent='center'
@@ -122,6 +135,7 @@ export default class ManagePurchase extends Component {
                fullWidth
                columns={this.state.columns}
                data={this.state.data}
+               style={{ whiteSpace: 'break-spaces' }}
                actions={[
                   {
                      icon: 'edit',
@@ -130,51 +144,29 @@ export default class ManagePurchase extends Component {
                         if (rowData.Status === "Requesting") {
                            this.setState({
                               open: true,
-                              heading: 'Edit Request Details',
                               childbtnDisplay: 'flex',
+                              heading: 'Edit Request Details',
                               action: 'Edit',
-                              fieldData: rowData
+                              fieldData: rowData,
+                              visible: 'flex',
+                              btnName: 'Cancel',
+                              formDisabled: false
                            })
                         } else {
-                           this.setState({ alert: true })
+                           this.setState({
+                              open: true,
+                              formDisabled: true,
+                              heading: 'Request Details',
+                              childbtnDisplay: 'none',
+                              action: 'Edit',
+                              fieldData: rowData,
+                              btnName: 'ok',
+                              visible: 'none'
+                           })
                         }
                      }
-                  },
-                  // oldData => ({
-                  //    icon: 'cancel',
-                  //    tooltip: 'Reject',
-                  //    onClick: (event, oldData) => {
-                  //       if (oldData.Status === 'Requesting') {
-                  //          this.setState(prevState => {
-                  //             const data = [...prevState.data];
-                  //             Axios.post('/request_details', { deleteID: data[data.indexOf(oldData)]._id })
-                  //                .then(this.componentDidMount())
-                  //             return { ...prevState, data };
-                  //          });
-                  //       } else {
-                  //          this.setState({ alert: true })
-                  //       }
-                  //    }
-                  // })
+                  }
                ]}
-               // editable={{
-               //    onRowDelete: oldData =>
-               //       new Promise((resolve, reject) => {
-               //          setTimeout(() => {
-               //             resolve();
-               //             if (oldData.Status === 'Requesting') {
-               //                this.setState(prevState => {
-               //                   const data = [...prevState.data];
-               //                   Axios.post('/home', { deleteID: data[data.indexOf(oldData)]._id })
-               //                      .then(this.componentDidMount())
-               //                   return { ...prevState, data };
-               //                });
-               //             } else {
-               //                this.setState({ alert: true })
-               //             }
-               //          }, 600);
-               //       })
-               // }}
                options={{
                   draggable: false,
                   sorting: true,
@@ -201,15 +193,17 @@ export default class ManagePurchase extends Component {
                      btnDisplay={this.state.childbtnDisplay}
                      data={this.state.fieldData}
                      action={this.state.action}
+                     form={this.state.formDisabled}
+                     iconVisible={this.state.visible}
+                     btnName={this.state.btnName}
                   />
                </Box>
             </Dialog >
             <Snackbar
                open={this.state.alert}
                autoHideDuration={3000}
-               anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+               anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
                onClose={this.closeAlert}
-               style={{ paddingRight: "25%" }}
             >
                <Alert
                   severity='error'

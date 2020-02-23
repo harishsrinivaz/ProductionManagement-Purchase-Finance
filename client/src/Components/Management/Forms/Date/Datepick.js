@@ -23,7 +23,7 @@ export const Datepick = props => {
                label='Due Date'
                format='DD/MM/YYYY'
                onChange={handleDateChange}
-               value={selectedDate}
+               value={props.value}
                KeyboardButtonProps={{
                   'aria-label': 'change date'
                }}

@@ -2,20 +2,18 @@ import React from 'react';
 import { Box, Button } from '@material-ui/core';
 import Dashboard from '../Dashboard/Dashboard';
 import ManagePurchase from './ManagePurchase';
+import ManageFinance from './ManageFinance';
 import ProtectedRoute from '../Auth/ProtectedRoute';
 import auth from '../Auth/auth';
 
 const Management = (props) => {
-   var dashboardList = [];
    const purchaseDept = [
-      { Name: 'Manage Purchase', Path: `manage-purchase` },
+      { Name: 'Manage Purchase', Path: 'manage-purchase' },
+      { Name: 'Manage Finance', Path: 'manage-finance' },
       { Name: 'Manage Stock', Path: 'manage-stock' },
       { Name: 'Manage Wastage', Path: 'manage-wastage' },
+      { Name: 'Reports', Path: 'reports' },
    ];
-   const financeDept = [
-      { Name: 'Manage Finance', Path: 'manage-finance' },
-   ];
-
    return (
       <Box display='flex' height='100vh'>
          <Dashboard items={purchaseDept} componentName={`management`} />
@@ -32,11 +30,16 @@ const Management = (props) => {
                path='/management/manage-purchase'
                component={ManagePurchase}
             />
+            <ProtectedRoute
+               exact
+               path='/management/manage-finance'
+               component={ManageFinance}
+            />
          </Box>
          <Box
             position='absolute'
-            left='91%'
-            top='3%'
+            left='87%'
+            top='5%'
          >
             <Button
                size='large'
