@@ -14,10 +14,12 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use(express.json())
-app.use('/request_details', require('./Routes/ReqDetailsRoute'))
+app.use('/request-details', require('./Routes/request_details'))
 app.use('/users', require('./Routes/UsersRoute'))
 app.use('/roles', require('./Routes/RolesRoute'))
-app.use('/raw_materials', require('./Routes/RawMaterialsRoute'))
+app.use('/raw-material', require('./Routes/raw_material'))
 app.use('/vendors', require('./Routes/VendorsRoute'))
+app.use('/logs', require('./Routes/LogsRoute'))
+app.use('/measuring-unit', require('./Routes/measuringUnit'))
 
 app.listen(PORT, () => { console.log('Server running...') })

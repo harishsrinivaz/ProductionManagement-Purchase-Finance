@@ -12,10 +12,10 @@ export default class ManagePurchase extends Component {
       super();
       this.state = {
          columns: [
-            { title: 'Material Name', field: 'Raw_Material_Name' },
+            { title: 'Material Name', field: 'Raw_Material_Id' },
             { title: 'Quantity', field: 'Quantity' },
-            //{ title: 'Unit', field: 'Measuring_Unit' },
-            //{ title: 'Vendor', field: 'Vendor_Name' },
+            { title: 'Unit', field: 'Measuring_Unit' },
+            { title: 'Vendor', field: 'Vendor_Name' },
             { title: 'Total Price', field: 'Total_Price' },
             {
                title: 'Quotation Document', field: 'Quotation_Document_URL',
@@ -50,7 +50,8 @@ export default class ManagePurchase extends Component {
                   catch (err) { console.log(err); return ('File not found') }
                }
             },
-            { title: 'Status', field: 'Status' }
+            { title: 'Status', field: 'Status' },
+            { title: 'Comment', field: 'Comment' },
          ],
          data: [],
          openDialog: false,
@@ -84,28 +85,55 @@ export default class ManagePurchase extends Component {
          .then(res => res.data)
          .then(RequestDetails => {
             RequestDetails.map(RequestDetail => {
-               Axios.post('/vendors', {
-                  _id: RequestDetail.Vendor
-               })
-                  .then(res => {
-                     RequestDetail.Vendor_Name =
-                        res.data.Vendor[0].vendor_name;
-                     req.push(RequestDetail);
-                     //console.log(req);
-                     this.setState({
-                        data: [...req]
-                     });
-                  })
-                  .catch(err => {
-                     RequestDetail.Vendor = 'Problem loading vendor';
-                     req.push(RequestDetail);
-                     //console.log(req);
-                     this.setState({
-                        data: [...req]
-                     });
+               Axios.post('/raw_materials', {
+                  _id: RequestDetail.Raw_Material_Id
+               }).then(res => {
+                  RequestDetail.Raw_Material_Id =
+                     res.data.RawMaterials[0].raw_material_name;
+                  console.log('Raw Materials:  ', res.data.RawMaterials[0]);
+                  //req.push(RequestDetail);
+                  this.setState({
+                     data: [...req]
                   });
-               return true
+               }).catch(err => {
+                  RequestDetail.Raw_Material_Id = 'Problem loading';
+                  //req.push(RequestDetail);
+                  console.log(err);
+                  this.setState({
+                     data: [...req]
+                  });
+               })
+
+               Axios.post('/measuring_units', {
+                  _id: RequestDetail.Measuring_Unit
+               }).then(res => {
+                  RequestDetail.Measuring_Unit = res.data.MeasuringUnit[0].measuring_unit_name;
+                  this.setState({
+                     data: [...req]
+                  });
+               })
+               req.push(RequestDetail);
+               // Axios.post('/vendors', {
+               //    _id: RequestDetail.Vendors
+               // })
+               //    .then(res => {
+               //       console.log('Vendor: ', RequestDetail.Vendor);
+               //       // RequestDetail.Vendor_Name =
+               //       //    res.data.Vendor[0].vendor_name;
+               //       // req.push(RequestDetail);
+               //       // this.setState({
+               //       //    data: [...req]
+               //       // });
+               //    })
+               //    .catch(err => {
+               //       RequestDetail.Vendor = 'Problem loading vendor';
+               //       req.push(RequestDetail);
+               //       console.log(err);
+               //       this.setState({
+               //          data: [...req]
+               //       });
             });
+            //});
          });
    }
 
@@ -135,6 +163,7 @@ export default class ManagePurchase extends Component {
                Request Details
             </Box>
             <MaterialTable
+               display='flex'
                title=''
                height
                fullWidth
@@ -151,7 +180,7 @@ export default class ManagePurchase extends Component {
                               openDialog: true,
                               childbtnDisplay: 'flex',
                               heading: 'Edit Request Details',
-                              action: 'Edit',
+                              action: 'Purchase',
                               fieldData: rowData,
                               iconVisible: 'flex',
                               btnName: 'Cancel',

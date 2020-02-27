@@ -188,7 +188,7 @@ export default class ManagePurchase extends Component {
                     fullWidth
                 >
                     <Box>
-                        <PurchaseForm
+                        {/* <PurchaseForm
                             heading={this.state.heading}
                             handler={this.handler}
                             btnDisplay={this.state.childbtnDisplay}
@@ -197,7 +197,7 @@ export default class ManagePurchase extends Component {
                             form={this.state.formDisabled}
                             iconVisible={this.state.visible}
                             btnName={this.state.btnName}
-                        />
+                        /> */}
                     </Box>
                 </Dialog >
                 <Snackbar

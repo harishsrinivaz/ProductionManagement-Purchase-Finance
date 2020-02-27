@@ -18,4 +18,10 @@ router.post('/', (req, res) => {
         });
 });
 
+router.post('/name', (req, res) => {
+    Vendors.find({ _id: req.body._id }).then(vendor => {
+        res.send(vendor[0].vendor_name)
+    }).catch(err => console.log(err))
+})
+
 module.exports = router;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Button } from '@material-ui/core';
 import Dashboard from '../Dashboard/Dashboard';
-import ManagePurchase from './ManagePurchase';
+import ManagePurchase from './Purchase/Manage_Purchase';
 import ManageFinance from './ManageFinance';
 import ProtectedRoute from '../Auth/ProtectedRoute';
 import auth from '../Auth/auth';

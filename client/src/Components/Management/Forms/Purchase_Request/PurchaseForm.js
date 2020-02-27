@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Box, TextField, Select, MenuItem, Button, FormControl, InputLabel } from '@material-ui/core';
 import useStyles from './PurchaseFormstyles';
 import UploadBtn from '../Upload/Upload';
-import { Datepick } from '../Date/Datepick';
 import Axios from 'axios';
 
 const style = {
@@ -10,30 +9,31 @@ const style = {
 };
 const PurchaseForm = (props) => {
    const classes = useStyles();
+   var unitsList = [];
+   var vendorsList = [];
    const [state, setState] = useState({
-      vendorsList: [],
       reqDetails: {
          quantity: props.data.Quantity,
          munit: props.data.Measuring_Unit,
          vendor: props.data.Vendor,
          amount: props.data.Total_Price,
          quotationURL: props.data.Quotation_Document_URL,
-         status: props.data.Status
+         status: props.data.Status,
+         comments: props.data.Comments
       }
    })
-   useEffect(() => {
-      if (props.action === 'Finance' || props.action === 'Purchase') {
-         Axios.get('/vendors')
-            .then(res => {
-               setState({ ...state, vendorsList: res.data.Vendors })
-               console.log(state.vendorsList)
-            })
-         console.log('Edit working...')
-      }
-   }, []);
+
+   // useEffect(() => {
+
+   //    // Axios.get('/measuring_units')
+   //    //    .then(res => {
+   //    //       unitsList = res.data.MeasuringUnits;
+   //    //       console.log('UnitsList: ', res.data.MeasuringUnits)
+   //    //    })
+   // }, [vendorsList])
 
    useEffect(() => {
-      console.log(state.reqDetails)
+      console.log("Details: ", state.reqDetails)
    }, [state.reqDetails])
 
    var qURL = [];
@@ -50,13 +50,14 @@ const PurchaseForm = (props) => {
             amount: props.data.Total_Price,
             vendor: props.data.Vendor,
             quotationURL: props.data.Quotation_Document_URL,
-            status: props.data.Status
+            status: props.data.Status,
+            comment: props.data.Comment
          }))
       }
       props.handler();
    }
    const onSubmit = () => {
-      console.log('onSubmit: ', state.reqDetails)
+      //console.log('onSubmit: ', state.reqDetails)
       var amount = document.getElementsByName('amount')[0].value;
       var quantity = document.getElementsByName('quantity')[0].value;
       if ((qURL.length === 0) ||
@@ -69,6 +70,21 @@ const PurchaseForm = (props) => {
          }))
       }
       else {
+         Axios.post('/measuring_units/name', {
+            name: state.reqDetails.munit
+         }).then(res => setState({ ...state, munit: res }))
+
+         Axios.post('/vendors/name', {
+            name: state.reqDetails.vendor
+         }).then(res => setState({ ...state, vendor: res }))
+         // Axios.post('/logs', {
+         //    logs: {
+         //       reqId: props.data._id,
+         //       from: 'Purchase',
+         //       to: 'Finance',
+         //       comments: state.reqDetails.comments
+         //    }
+         // }).then(res => { console.log(res) })
          Axios.post('/request_details', {
             Edit: {
                _id: props.data._id,
@@ -77,7 +93,8 @@ const PurchaseForm = (props) => {
                vendor: state.reqDetails.vendor,
                amount: state.reqDetails.amount,
                quotationURL: qURL,
-               status: state.reqDetails.status
+               status: state.reqDetails.status,
+               //comments: state.reqDetails.comments
             }
          }).then(console.log("Updated: ", state.reqDetails, qURL),
             props.handler()
@@ -97,16 +114,31 @@ const PurchaseForm = (props) => {
             amount: event.target.name === 'amount' ? event.target.value
                : document.getElementsByName('amount')[0].value,
             status: event.target.name === 'status' ? event.target.value
-               : document.getElementsByName('status')[0].value
+               : document.getElementsByName('status')[0].value,
+            // comment: event.target.name === 'comments' ? event.target.value
+            //    : document.getElementsByName('comments')[0].value
          }
       })
    }
 
-   const loadVendors = () => {
+   const loadUnits = () => {
+      console.log('unitlist', unitsList);
       return (
-         state.vendorsList.map((vendor, index) => (
-            <MenuItem key={index} value={vendor._id}>{vendor.vendor_name}</MenuItem>
+         unitsList.map((unit, index) => (
+            <MenuItem key={index} value={unit.measuring_unit_name}>{unit.measuring_unit_name}</MenuItem>
+         ))
+      )
+   }
 
+   const loadVendors = () => {
+      Axios.get('/vendors')
+         .then(res => {
+            vendorsList = res.data.Vendors;
+            console.log('VendorsList: ', vendorsList)
+         })
+      return (
+         vendorsList.map((vendor, index) => (
+            <MenuItem>{vendor.vendor_name}</MenuItem>
          )))
    }
 
@@ -129,7 +161,7 @@ const PurchaseForm = (props) => {
             'Purchase-Inprogress',
          ];
       }
-      console.log('Status loaded');
+      //console.log('Status loaded');
       return (
          status.map((msg, index) => (
             <MenuItem key={index} value={msg} disabled={(msg === 'ForwardedToFinance' && props.action === 'Finance') || msg === 'Requesting'}>{msg}</MenuItem>
@@ -139,38 +171,18 @@ const PurchaseForm = (props) => {
    const Form = (
       <Box className={classes.form}>
          <Box className={classes.boxSize2}>
-            <FormControl
+
+            <TextField
+               name='rmname'
+               size='small'
                fullWidth
                variant='outlined'
-               size='small'
+               label='Material Name'
+               value={props.data.Raw_Material_Id}
                style={style}
                required
-            >
-               <InputLabel
-                  style={{
-                     backgroundColor: 'white',
-                     paddingLeft: '5px',
-                     paddingRight: '5px',
-                  }}
-               >
-                  Material Name
-               </InputLabel>
-               <Select
-                  name='rmname'
-                  fullWidth
-                  variant='outlined'
-                  value={props.data.Raw_Material_Name}
-                  disabled
-                  required
-               >
-                  <MenuItem value='Raw Material Name' disabled>
-                     Raw Material Name
-                  </MenuItem>
-                  <MenuItem value='Apple'>Apple</MenuItem>
-                  <MenuItem value='Mango'>Mango</MenuItem>
-                  <MenuItem value='Orange'>Orange</MenuItem>
-               </Select>
-            </FormControl>
+               disabled
+            ></TextField>
 
             <TextField
                name='rmid'
@@ -178,7 +190,7 @@ const PurchaseForm = (props) => {
                fullWidth
                variant='outlined'
                label='Material Code'
-               value={props.data.Raw_Material_Id}
+               value={props.data.Raw_Material_Code}
                required
                disabled
             ></TextField>
@@ -220,9 +232,7 @@ const PurchaseForm = (props) => {
                   <MenuItem value='Measuring_Unit'>
                      Measuring Unit
                   </MenuItem>
-                  <MenuItem value='kg'>kg</MenuItem>
-                  <MenuItem value='ltr'>ltr</MenuItem>
-                  <MenuItem value='ton'>ton</MenuItem>
+                  {/* {loadUnits()} */}
                </Select>
             </FormControl>
 
@@ -249,9 +259,9 @@ const PurchaseForm = (props) => {
                   onChange={(event) => setValue(event)}
                   required
                >
-                  <MenuItem value='Vendor' disabled selected>
+                  {/* <MenuItem value='Vendor' disabled selected>
                      Vendor
-                  </MenuItem>
+                  </MenuItem> */}
                   {loadVendors()}
                </Select>
             </FormControl>
@@ -299,8 +309,51 @@ const PurchaseForm = (props) => {
             </FormControl>
 
             <Box width='100%' disabled style={{ position: 'relative', bottom: "5px" }}>
-               <Datepick id='1' Req='true' value={state.reqDetails.date} />
+               {/* <Datepick id='1' Req='true' value={state.reqDetails.date} /> */}
             </Box>
+         </Box>
+
+         <Box className={classes.boxSize2}>
+            <FormControl
+               fullWidth
+               variant='outlined'
+               size='small'
+               required
+            >
+               <InputLabel
+                  style={{ backgroundColor: 'white', padding: "0 5px" }}
+               >
+                  Status
+               </InputLabel>
+
+               <Select
+                  disabled={props.form.status}
+                  name='status'
+                  variant='outlined'
+                  value={state.reqDetails.status}
+                  required
+                  onChange={(event) => setValue(event)}
+               >
+                  <MenuItem value='Status' disabled>
+                     Status
+                  </MenuItem>
+                  {loadStatus()}
+               </Select>
+            </FormControl>
+
+            <TextField
+               disabled={props.form.comment}
+               name='comments'
+               size='small'
+               style={{ marginLeft: '20px' }}
+               fullWidth
+               value={state.reqDetails.comments}
+               variant='outlined'
+               label='Comments'
+               // onChange={(event) => setValue(event)}
+               multiline
+               rowsMax='2'
+            ></TextField>
          </Box>
 
          <Box className={classes.lastboxSize2}>
@@ -311,40 +364,6 @@ const PurchaseForm = (props) => {
                setDocUrl={childState}
                icon={props.iconVisible}
             />
-
-            <FormControl
-               variant='outlined'
-               size='small'
-               required
-               style={{ marginLeft: '20px', width: "100%" }}
-            >
-               <InputLabel
-                  style={{ backgroundColor: 'white', padding: "0 5px" }}
-               >
-                  Status
-               </InputLabel>
-               <Select
-                  disabled={props.form.status}
-                  name='status'
-                  fullWidth
-                  variant='outlined'
-                  value={state.reqDetails.status}
-                  required
-                  onChange={(event) => setValue(event)}
-               >
-                  <MenuItem value='Status' disabled>
-                     Status
-                  </MenuItem>
-                  {/* <MenuItem value='Requesting' disabled>Requesting</MenuItem>
-                  <MenuItem value='ForwardedToFinance'>ForwardedToFinance</MenuItem>
-                  <MenuItem value='ForwardedToAdmin'>ForwardedToAdmin</MenuItem>
-                  <MenuItem value='Inprogress'>Inprogress</MenuItem>
-                  <MenuItem value='Accepted'>Accepted</MenuItem>
-                  <MenuItem value='Delivered'>Delivered</MenuItem>
-                  <MenuItem value='Rejected'>Rejected</MenuItem> */}
-                  {loadStatus()}
-               </Select>
-            </FormControl>
          </Box>
       </Box >
    );
@@ -353,7 +372,7 @@ const PurchaseForm = (props) => {
          <Box>
             <Box textAlign="center"><h1>{props.heading}</h1></Box>
             <Box className={classes.lbox}>{Form}</Box>
-            <Box display='flex' justifyContent='flex-end' p={0} pr={9.5}>
+            <Box display='flex' justifyContent='flex-end' m={0} pr={9.5}>
                <Box pb={4}>
                   <Button
                      style={{ fontWeight: 'bold' }}
