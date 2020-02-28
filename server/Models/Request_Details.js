@@ -10,7 +10,7 @@ const schema = new Schema({
     Total_Price: { type: Number, required: true },
     Priority: { type: String, required: true },
     Due_Date: { type: Date, required: true },
-    Quotation_Document_URL: [{ type: String, required: true }],
+    Quotation_Document_URL: { type: Array, required: true },
     Status: { type: String, required: true },
     Invoice_Date: { type: Date, required: true },
     Invoice_Amount: { type: Number, required: true },
@@ -22,4 +22,4 @@ const schema = new Schema({
 
 const reqDetails = mongoose.model('Request_Details', schema);
 
-module.exports = reqDetails;
+module.exports = reqDetails;   

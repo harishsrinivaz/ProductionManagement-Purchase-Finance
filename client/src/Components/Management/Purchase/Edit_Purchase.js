@@ -11,6 +11,8 @@ import {
 import axios from "axios";
 import Styles from "./styles/FormStyles";
 import { Datepick } from "./Date/Datepick";
+import ProtectedRoute from '../../Auth/ProtectedRoute'
+import { Link as RefLink } from 'react-router-dom'
 
 const styles = Styles;
 const style = {
@@ -37,38 +39,65 @@ export default class EditPurchase extends Component {
       measuring_units: [],
       materials: [],
       vendors: [],
-      logComments: ''
+      logComments: '',
+      To: '-',
+      file: ''
     };
     this.onEditHandler = () => {
-      axios.post('/logs/comment', {
-        logs: {
-          reqId: props.Purchase._id,
-          from: 'Purchase',
-          to: 'Finance',
-          comments: this.state.Comments
-        }
-      }).then(comments => {
-        console.log('Comments: ', comments)
-        axios
-          .post("/request-details/edit", {
-            _id: this.state._id,
-            Raw_Material_Id: this.state.Raw_Material_Id,
-            Raw_Material_Code: this.state.Raw_Material_Code,
-            Quantity: this.state.Quantity,
-            Measuring_Unit: this.state.Measuring_Unit,
-            Priority: this.state.Priority,
-            Due_Date: this.state.Due_Date,
-            Status: this.state.Status,
-            Comments: comments.data._id,
-            Vendor: this.state.Vendor,
-            Total_Price: this.state.Total_Price
-          })
+      //this.checkTo();
+      const formData = new FormData();
+      console.log('L: ', this.state.file.length)
+      for (let i = 0; i < this.state.file.length; i++) {
+        formData.append('file', this.state.file[i]);
+        axios.post('/files', formData, {
+          _id: props.Purchase._id,
+          headers: {
+            'content-type': 'multipart/form-data'
+          }
+        })
           .then(res => {
-            console.log(res.data);
-            this.props.cancel();
-          })
-      }).catch(err => console.log(err));
+            axios.post('/logs/comment', {
+              logs: {
+                reqId: props.Purchase._id,
+                from: 'Purchase',
+                to: this.state.To,
+                comments: this.state.Comments
+              }
+            }).then(comments => {
+              console.log('Comments: ', comments)
+              axios
+                .post("/request-details/edit", {
+                  _id: this.state._id,
+                  Raw_Material_Id: this.state.Raw_Material_Id,
+                  Raw_Material_Code: this.state.Raw_Material_Code,
+                  Quantity: this.state.Quantity,
+                  Measuring_Unit: this.state.Measuring_Unit,
+                  Priority: this.state.Priority,
+                  Due_Date: this.state.Due_Date,
+                  Status: this.state.Status,
+                  Comments: this.state.Comments,
+                  Vendor: this.state.Vendor,
+                  Total_Price: this.state.Total_Price,
+                  Quotation_Document_URL: res.data
+                })
+            }).then(this.props.cancel())
+          }).catch(err => console.log(err));
+      }
     };
+
+    this.checkTo = () => {
+      if (this.state.Status === 'ForwardedToProduction') {
+        this.setState({ To: 'Production' })
+        return 'Production'
+      }
+      else if (this.state.Status === 'ForwardedToFinance') {
+        this.setState({ To: 'Finance' })
+        return 'Finance'
+      }
+      else {
+        return ' '
+      }
+    }
 
     this.loadStatus = () => {
       let status = [];
@@ -126,7 +155,7 @@ export default class EditPurchase extends Component {
       Priority: this.props.Purchase.Priority,
       Due_Date: this.props.Purchase.Due_Date,
       Status: this.props.Purchase.Status,
-      Comments: this.props.logComments,
+      Comments: this.state.Comments,
       Vendor: this.props.Purchase.Vendor,
       Total_Price: this.props.Purchase.Total_Price
     });
@@ -437,7 +466,10 @@ export default class EditPurchase extends Component {
                       </Select>
                     </FormControl>
                   </Box>
-                  <Box width="100%" style={style}>
+                  <Box width="100%" style={style} display='flex' flexDirection='column'>
+                    <Box>From: {this.props.From}</Box>
+                    <Box>To: {this.props.To}</Box>
+                    <Box pb={1}>Last Comment : {this.props.logComments}</Box>
                     <TextField
                       disabled={this.props.disabled.comment}
                       size='small'
@@ -445,7 +477,7 @@ export default class EditPurchase extends Component {
                       rowsMax="3"
                       variant="outlined"
                       fullWidth
-                      label="Comments"
+                      label="Comment"
                       value={this.state.Comments}
                       onChange={event => {
                         this.setState({
@@ -455,6 +487,46 @@ export default class EditPurchase extends Component {
                       }}
                     ></TextField>
                   </Box>
+                </Box>
+                <Box style={styles.boxSize2}>
+                  <Box
+                    display={this.props.uploadFile}
+                  >
+                    <input
+                      type='file'
+                      multiple='multiple'
+                      onChange={(event) => {
+                        this.setState({
+                          file: event.target.files
+                        })
+                        console.log('temp: ', this.state.file);
+                      }}
+                    />
+                  </Box>
+                  {this.props.uploadFile === 'none' ?
+                    (
+                      this.props.Purchase.Quotation_Document_URL.map((file, index) => (
+                        <Box key={index}>
+                          <RefLink
+                            to='document'
+                            target='_blank'
+                            onClick={(event) => {
+                              event.preventDefault();
+                              window.open(require(`../../../file storage/${file}`));
+                            }}
+                            style={{ textDecoration: 'none', color: 'black' }}
+                          >
+                            {file}
+                          </RefLink>
+                          <ProtectedRoute
+                            path='document'
+                            component={require(`../../../file storage/${file}`)}
+                          />
+                        </Box>
+                      ))
+                    )
+                    : (null)
+                  }
                 </Box>
               </Box>
             </Box>

@@ -54,6 +54,7 @@ const styles = {
     // paddingTop: "30px"
   },
   boxSize2: {
+    width: "100%",
     display: "flex",
     flexDirection: "row",
     alignContent: "center",

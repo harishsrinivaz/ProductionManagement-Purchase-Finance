@@ -7,14 +7,14 @@ router.get("/", (req, res) => {
   request_details.find({}, function (err, data) {
     if (err) throw err;
     res.send(data);
-    console.log(data);
+    //  console.log(data);
   });
 });
 router.post("/", (req, res) => {
   request_details.find({ _id: req.body._id }, function (err, data) {
     if (err) throw err;
     res.send(data);
-    console.log(data);
+    //console.log(data);
   });
 });
 
@@ -31,7 +31,7 @@ router.post("/add", (req, res) => {
     Comments,
     error = []
   } = req.body;
-  console.log(req.body);
+  //console.log(req.body);
 
   const new_request_details = new request_details({
     //_id,
@@ -76,7 +76,8 @@ router.post("/edit", (req, res) => {
     Status,
     Comments,
     Total_Price,
-    Vendor
+    Vendor,
+    Quotation_Document_URL
   } = req.body;
 
   request_details
@@ -92,7 +93,8 @@ router.post("/edit", (req, res) => {
         Status,
         Comments,
         Total_Price,
-        Vendor
+        Vendor,
+        Quotation_Document_URL
       }
     )
     .then(request_details => {

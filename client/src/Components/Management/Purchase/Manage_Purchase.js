@@ -15,11 +15,33 @@ export default class ManagePurchase extends Component {
         // { title: "Material ID", field: "Raw_Material_Id" },
         { title: "Material Name", field: "Raw_Material_Id" },
         { title: "Quantity", field: "Quantity" },
-        { title: "Measuring Unit", field: "Measuring_Unit" },
+        // { title: "Measuring Unit", field: "Measuring_Unit" },
         { title: "Vendor", field: "Vendor" },
         { title: "Total Price", field: "Total_Price" },
+        {
+          title: 'Quotation Document', field: 'Quotation_Document_URL',
+          render: rowData => {
+            var recFile = rowData.Quotation_Document_URL;
+            try {
+              if (recFile.length > 0) {
+                recFile.map((file) => {
+                  require(`../../../file storage/${file}`)
+                })
+                return recFile;
+              }
+              else {
+                return 'File not uploaded'
+              }
+            }
+            catch (err) {
+              return 'File not found'
+            }
+          }
+        },
         //{ title: "Priority", field: "Priority" },
-        { title: "Status", field: "Status" },
+        //{ title: "Status", field: "Status" },
+        // { title: "From", field: "From" },
+        // { title: "To", field: "To" },
         { title: "Comments", field: "Comments" }
       ],
       data: [],
@@ -34,7 +56,10 @@ export default class ManagePurchase extends Component {
         status: false,
         comment: false,
         btnDisplay: 'none',
-        btnText: 'Close'
+        btnText: 'Close',
+        from: '',
+        to: '',
+        uploadFile: 'flex'
       },
       logComments: ''
     };
@@ -47,9 +72,9 @@ export default class ManagePurchase extends Component {
           _id: rowData._id
         })
         .then(res => {
-          console.log(res.data[0]);
+          //console.log(res.data[0]);
           this.EditData = { ...res.data[0] };
-          console.log(this.EditData);
+          //console.log(this.EditData);
           this.setState({
             openEdit: true
           });
@@ -57,7 +82,7 @@ export default class ManagePurchase extends Component {
     };
     this.handleClose = () => {
       axios.get("/request-details").then(res => {
-        console.log(res.data);
+        console.log('reqDetials: ', res.data);
         for (let i = 0; i < res.data.length; i++) {
           res.data[i].id = i + 1;
           //Axios
@@ -66,11 +91,11 @@ export default class ManagePurchase extends Component {
               _id: res.data[i].Measuring_Unit
             })
             .then(MeasuringUnit => {
-              console.log(MeasuringUnit);
+              // console.log(MeasuringUnit);
               if (MeasuringUnit.data.MeasuringUnit[0]) {
-                console.log(
-                  MeasuringUnit.data.MeasuringUnit[0].measuring_unit_name
-                );
+                // console.log(
+                //   MeasuringUnit.data.MeasuringUnit[0].measuring_unit_name
+                // );
                 res.data[i].Measuring_Unit =
                   MeasuringUnit.data.MeasuringUnit[0].measuring_unit_name;
                 this.setState({
@@ -91,9 +116,9 @@ export default class ManagePurchase extends Component {
               //_id: res.data[i].Product_ID
             })
             .then(MaterialId => {
-              console.log(MaterialId);
+              //console.log(MaterialId);
               if (MaterialId.data.RawMaterial[0]) {
-                console.log(MaterialId.data.RawMaterial[0].raw_material_name);
+                // console.log(MaterialId.data.RawMaterial[0].raw_material_name);
                 res.data[i].Raw_Material_Id =
                   MaterialId.data.RawMaterial[0].raw_material_name;
                 this.setState({
@@ -108,15 +133,15 @@ export default class ManagePurchase extends Component {
             });
           //end
           //Axios
-          if (res.data[i].Vendor != "") {
+          if (res.data[i].Vendor !== "") {
             axios
               .post("/vendors", {
                 _id: res.data[i].Vendor
               })
               .then(VendorName => {
-                console.log('Vendor: ', VendorName);
+                // console.log('Vendor: ', VendorName);
                 if (VendorName.data.Vendor[0]) {
-                  console.log(VendorName.data.Vendor[0].vendor_name);
+                  //  console.log(VendorName.data.Vendor[0].vendor_name);
                   res.data[i].Vendor = VendorName.data.Vendor[0].vendor_name;
                   this.setState({
                     data: [...res.data]
@@ -130,19 +155,21 @@ export default class ManagePurchase extends Component {
               });
           }
           //end
-          if (res.data[i].Comments != "") {
-            axios
-              .post('/logs', {
-                _id: res.data[i].Comments
-              })
-              .then(comments => {
-                console.log('Comments: ', comments);
-                res.data[i].Comments = comments.data[0].Comments;
-                this.setState({
-                  data: [...res.data]
-                });
-              }).catch(err => console.log(err))
-          }
+          // if (res.data[i].Comments != "") {
+          //   axios
+          //     .post('/logs', {
+          //       _id: res.data[i].Comments
+          //     })
+          //     .then(comments => {
+          //       console.log('Comments: ', comments);
+          //       res.data[i].Comments = comments.data[0].Comments;
+          //       res.data[i].From = comments.data[0].Address.From;
+          //       res.data[i].To = comments.data[0].Address.To;
+          //       this.setState({
+          //         data: [...res.data]
+          //       });
+          //     }).catch(err => console.log(err))
+          // }
         }
       });
     };
@@ -167,7 +194,12 @@ export default class ManagePurchase extends Component {
           title=" "
           columns={this.state.columns}
           data={this.state.data}
-          style={{ width: "100%", overflow: "auto", alignItems: "left" }}
+          style={{
+            width: "100%",
+            overflow: "auto",
+            alignItems: "left",
+            whiteSpace: 'break-spaces'
+          }}
           options={{
             sorting: true,
             headerStyle: {
@@ -182,9 +214,12 @@ export default class ManagePurchase extends Component {
               icon: "edit",
               tooltip: "Edit User",
               onClick: (event, rowData) => {
-                if (rowData.Status === 'Requesting') {
+                if (rowData.Status === 'Requesting' || rowData.Status === 'ForwardedToPurchase') {
                   this.setState({
                     logComments: rowData.Comments,
+                    from: rowData.From,
+                    to: rowData.To,
+                    uploadFile: 'flex',
                     fieldDisabled: {
                       quantity: false,
                       unit: false,
@@ -207,6 +242,9 @@ export default class ManagePurchase extends Component {
           onRowClick={(event, rowData) => {
             this.setState({
               logComments: rowData.Comments,
+              from: rowData.From,
+              to: rowData.To,
+              uploadFile: 'none',
               fieldDisabled: {
                 quantity: true,
                 unit: true,
@@ -226,6 +264,9 @@ export default class ManagePurchase extends Component {
             <EditPurchase
               disabled={this.state.fieldDisabled}
               dept='Purchase'
+              uploadFile={this.state.uploadFile}
+              From={this.state.from}
+              To={this.state.to}
               logComments={this.state.logComments}
               Purchase={this.EditData}
               cancel={() => {
