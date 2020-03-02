@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import MaterialTable from "material-table";
-import { Box, DialogContent, Snackbar } from "@material-ui/core";
+import { Box, DialogContent, Snackbar, Button } from "@material-ui/core";
 import Dialog from "@material-ui/core/Dialog";
 import axios from "axios";
 import EditPurchase from "./Edit_Purchase";
@@ -18,30 +18,30 @@ export default class ManagePurchase extends Component {
         // { title: "Measuring Unit", field: "Measuring_Unit" },
         { title: "Vendor", field: "Vendor" },
         { title: "Total Price", field: "Total_Price" },
-        {
-          title: 'Quotation Document', field: 'Quotation_Document_URL',
-          render: rowData => {
-            var recFile = rowData.Quotation_Document_URL;
-            try {
-              if (recFile.length > 0) {
-                recFile.map((file) => {
-                  require(`../../../file storage/${file}`)
-                })
-                return recFile;
-              }
-              else {
-                return 'File not uploaded'
-              }
-            }
-            catch (err) {
-              return 'File not found'
-            }
-          }
-        },
+        // {
+        //   title: 'Quotation Document', field: 'Quotation_Document_URL',
+        //   render: rowData => {
+        //     var recFile = rowData.Quotation_Document_URL;
+        //     try {
+        //       if (recFile.length > 0) {
+        //         recFile.map((file) => {
+        //           require(`../../../file storage/${file}`)
+        //         })
+        //         return recFile;
+        //       }
+        //       else {
+        //         return 'File not uploaded'
+        //       }
+        //     }
+        //     catch (err) {
+        //       return 'File not found'
+        //     }
+        //   }
+        // },
         //{ title: "Priority", field: "Priority" },
-        //{ title: "Status", field: "Status" },
-        // { title: "From", field: "From" },
-        // { title: "To", field: "To" },
+        { title: "Status", field: "Status" },
+        //{ title: "From", field: "From" },
+        //{ title: "To", field: "To" },
         { title: "Comments", field: "Comments" }
       ],
       data: [],
@@ -61,7 +61,8 @@ export default class ManagePurchase extends Component {
         to: '',
         uploadFile: 'flex'
       },
-      logComments: ''
+      logComments: '',
+      temp: []
     };
     this.closeAlert = () => {
       this.setState({ alert: false })
@@ -80,98 +81,90 @@ export default class ManagePurchase extends Component {
           });
         });
     };
+
+    this.loadAccepted = () => {
+      var temp = [];
+      axios.get("/request-details").then(res => {
+        for (let i = 0; i < res.data.length; i++) {
+          if (res.data[i].Status === 'Finance-Accepted') {
+          }
+        }
+        this.setState({
+          data: temp
+        })
+      })
+    }
+
+    this.munit = (res, i) => {
+      axios.post("/measuring-unit/measuring-unit", {
+        _id: res.data[i].Measuring_Unit
+      }).then(MeasuringUnit => {
+        res.data[i].Measuring_Unit =
+          MeasuringUnit.data.MeasuringUnit[0].measuring_unit_name;
+        this.mname(res, i);
+      }).catch(err => {
+        res.data[i].Measuring_Unit = 'undefine';
+        console.log(err)
+        this.mname(res, i);
+      })
+    }
+
+    this.mname = (res, i) => {
+      axios.post("/raw-material", {
+        _id: res.data[i].Raw_Material_Id
+      }).then(MaterialId => {
+        res.data[i].Raw_Material_Id =
+          MaterialId.data.RawMaterial[0].raw_material_name;
+        this.vendor(res, i);
+      }).catch(err => {
+        res.data[i].Raw_Material_Id = 'undefine'
+        console.log(err)
+        this.vendor(res, i);
+      })
+    }
+
+    this.vendor = (res, i) => {
+      var temp = [];
+      axios.post("/vendors", {
+        _id: res.data[i].Vendor
+      })
+        .then(VendorName => {
+          res.data[i].Vendor = VendorName.data.Vendor[0].vendor_name;
+          this.state.temp.push(res.data[i]);
+          this.setState({
+            data: [...res.data]
+          })
+        }).catch(err => {
+          res.data[i].Vendor = 'undefine';
+          this.state.data.push(res.data[i])
+          console.log(err)
+        })
+    }
     this.handleClose = () => {
       axios.get("/request-details").then(res => {
-        console.log('reqDetials: ', res.data);
+        //console.log('reqDetails: ', res.data);
         for (let i = 0; i < res.data.length; i++) {
           res.data[i].id = i + 1;
-          //Axios
-          axios
-            .post("/measuring-unit/measuring-unit", {
-              _id: res.data[i].Measuring_Unit
-            })
-            .then(MeasuringUnit => {
-              // console.log(MeasuringUnit);
-              if (MeasuringUnit.data.MeasuringUnit[0]) {
-                // console.log(
-                //   MeasuringUnit.data.MeasuringUnit[0].measuring_unit_name
-                // );
-                res.data[i].Measuring_Unit =
-                  MeasuringUnit.data.MeasuringUnit[0].measuring_unit_name;
-                this.setState({
-                  data: [...res.data]
-                });
-              } else {
-                res.data[i].Measuring_Unit = "problem loading Measuring Unit";
-                this.setState({
-                  data: [...res.data]
-                });
-              }
-            });
-          //end
-          //Axios
-          axios
-            .post("/raw-material", {
-              _id: res.data[i].Raw_Material_Id
-              //_id: res.data[i].Product_ID
-            })
-            .then(MaterialId => {
-              //console.log(MaterialId);
-              if (MaterialId.data.RawMaterial[0]) {
-                // console.log(MaterialId.data.RawMaterial[0].raw_material_name);
-                res.data[i].Raw_Material_Id =
-                  MaterialId.data.RawMaterial[0].raw_material_name;
-                this.setState({
-                  data: [...res.data]
-                });
-              } else {
-                res.data[i].Raw_Material_Id = "problem loading";
-                this.setState({
-                  data: [...res.data]
-                });
-              }
-            });
-          //end
-          //Axios
-          if (res.data[i].Vendor !== "") {
-            axios
-              .post("/vendors", {
-                _id: res.data[i].Vendor
-              })
-              .then(VendorName => {
-                // console.log('Vendor: ', VendorName);
-                if (VendorName.data.Vendor[0]) {
-                  //  console.log(VendorName.data.Vendor[0].vendor_name);
-                  res.data[i].Vendor = VendorName.data.Vendor[0].vendor_name;
-                  this.setState({
-                    data: [...res.data]
-                  });
-                } else {
-                  res.data[i].Vendor = "problem loading";
-                  this.setState({
-                    data: [...res.data]
-                  });
-                }
-              });
-          }
-          //end
-          // if (res.data[i].Comments != "") {
-          //   axios
-          //     .post('/logs', {
-          //       _id: res.data[i].Comments
-          //     })
-          //     .then(comments => {
-          //       console.log('Comments: ', comments);
-          //       res.data[i].Comments = comments.data[0].Comments;
-          //       res.data[i].From = comments.data[0].Address.From;
-          //       res.data[i].To = comments.data[0].Address.To;
-          //       this.setState({
-          //         data: [...res.data]
-          //       });
-          //     }).catch(err => console.log(err))
-          // }
+          this.munit(res, i);
         }
-      });
+
+        // this.setState({
+        //   data: this.state.temp
+        // })
+        // //end
+        // if (res.data[i].Comments !== "") {
+        //   axios
+        //     .post('/logs', {
+        //       _id: res.data[i]._id
+        //     })
+        //     .then(comments => {
+        //       //console.log('Comments: ', comments);
+        //       res.data[i].Comments = comments.data[0].Comments;
+        //       res.data[i].From = comments.data[0].Address.From;
+        //       res.data[i].To = comments.data[0].Address.To;
+        //     }).catch(err => console.log(err))
+        // }
+      })
     };
   }
   componentDidMount() {
@@ -190,6 +183,15 @@ export default class ManagePurchase extends Component {
         <Box fontSize="30px" mb={3} fontWeight="bold">
           Request Details
         </Box>
+        <Box display='flex' justifyContent='flex-start' width='100%' pb={2}>
+          <Button
+            variant='contained'
+            color='primary'
+            size='small'
+            // style={{ fontWeight: 'bold' }}
+            onClick={this.loadAccepted}
+          >Finance Accepted</Button>
+        </Box>
         <MaterialTable
           title=" "
           columns={this.state.columns}
@@ -198,7 +200,7 @@ export default class ManagePurchase extends Component {
             width: "100%",
             overflow: "auto",
             alignItems: "left",
-            whiteSpace: 'break-spaces'
+            whiteSpace: 'break-spaces',
           }}
           options={{
             sorting: true,
@@ -214,7 +216,7 @@ export default class ManagePurchase extends Component {
               icon: "edit",
               tooltip: "Edit User",
               onClick: (event, rowData) => {
-                if (rowData.Status === 'Requesting' || rowData.Status === 'ForwardedToPurchase') {
+                if (rowData.Status === 'Requesting' || rowData.Status === 'ForwardedToPurchase' || rowData.Status === 'Finance-Accepted') {
                   this.setState({
                     logComments: rowData.Comments,
                     from: rowData.From,

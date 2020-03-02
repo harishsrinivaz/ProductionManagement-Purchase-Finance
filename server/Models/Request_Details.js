@@ -12,9 +12,6 @@ const schema = new Schema({
     Due_Date: { type: Date, required: true },
     Quotation_Document_URL: { type: Array, required: true },
     Status: { type: String, required: true },
-    Invoice_Date: { type: Date, required: true },
-    Invoice_Amount: { type: Number, required: true },
-    Invoice_Document_URL: [{ type: String, required: true }],
     Entry_Date: { type: Date, default: Date.now, required: true },
     Comments: { type: String }
 }

@@ -11,21 +11,33 @@ router.get('/', (req, res) => {
 })
 
 router.post('/', (req, res) => {
+
     if (req.files) {
         const file = req.files.file;
         var storeFile = [];
-        console.log('_id: ', file.name)
-        for (let i = 0; i < file.length; i++) {
-            file[i].mv(`${__dirname}/../../client/src/file storage/${file[i].name}`, err => {
+        console.log('File received');
+        if (file.length) {
+            for (let i = 0; i < file.length; i++) {
+                file[i].mv(`${__dirname}/../../client/src/file storage/${file[i].name}`, err => {
+                    if (err) res.send(err)
+                    else {
+                        storeFile.push(file[i].name);
+                        if (i === file.length - 1) {
+                            res.send(storeFile)
+                        }
+                        console.log('FileName: ', file[i].name)
+                    }
+                })
+            }
+        }
+        else {
+            file.mv(`${__dirname}/../../client/src/file storage/${file.name}`, err => {
                 if (err) res.send(err)
                 else {
-                    storeFile.push(file[i].name);
-                    if (i === file.length - 1) {
-                        res.send(storeFile)
-                    }
-                    console.log('FileName: ', file[i].name)
+                    res.send(file.name)
                 }
             })
+            //res.send(file.name)
         }
     }
 })

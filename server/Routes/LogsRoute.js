@@ -11,13 +11,14 @@ router.get('/', (req, res) => {
 
 router.post('/', (req, res) => {
     if (req.body._id) {
-        logs.find({ _id: req.body._id }).then(log => {
+        logs.find({ Request_Id: req.body._id }).then(log => {
             res.send(log);
         }).catch(err => console.log(err))
     }
 })
 
 router.post('/comment', (req, res) => {
+    console.log(req.body.logs)
     if (req.body.logs) {
         var reqId = req.body.logs.reqId;
         var from = req.body.logs.from;

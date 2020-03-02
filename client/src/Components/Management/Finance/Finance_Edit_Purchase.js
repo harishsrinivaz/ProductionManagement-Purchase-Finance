@@ -6,16 +6,13 @@ import {
   Select,
   FormControl,
   InputLabel,
-  MenuItem,
-  Dialog,
-  DialogContent
+  MenuItem
 } from "@material-ui/core";
 import axios from "axios";
 import Styles from "./styles/FormStyles";
 import { Datepick } from "./Date/Datepick";
 import ProtectedRoute from '../../Auth/ProtectedRoute'
 import { Link as RefLink } from 'react-router-dom'
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 
 const styles = Styles;
 const style = {
@@ -43,93 +40,75 @@ export default class EditPurchase extends Component {
       materials: [],
       vendors: [],
       logComments: '',
-      To: 'Finance',
-      file: '',
-      openDialog: false
+      To: 'Admin',
+      file: ''
     };
-
-    this.closeDialog = () => {
-      this.setState({ openDialog: false })
-    }
-
     this.onEditHandler = () => {
       this.checkTo();
-      const formData = new FormData();
-      console.log('L: ', this.state.file)
-      for (let i = 0; i < this.state.file.length; i++) {
-        formData.append('file', this.state.file[i]);
-      }
-      axios.post('/files', formData, {
-        headers: {
-          'content-type': 'multipart/form-data'
+      axios.post('/logs/comment', {
+        logs: {
+          reqId: props.Finance._id,
+          from: 'Finance',
+          to: this.state.To,
+          comments: this.state.Comments
         }
-      }).then(res => {
-        console.log('file: ', res)
-        axios.post('/logs/comment', {
-          logs: {
-            reqId: props.Purchase._id,
-            from: 'Purchase',
-            to: 'Finance',
-            comments: this.state.Comments
-          }
-        }).then(comments => {
-          console.log('Comments: ', comments)
-          axios
-            .post("/request-details/edit", {
-              _id: this.state._id,
-              Raw_Material_Id: this.state.Raw_Material_Id,
-              Raw_Material_Code: this.state.Raw_Material_Code,
-              Quantity: this.state.Quantity,
-              Measuring_Unit: this.state.Measuring_Unit,
-              Priority: this.state.Priority,
-              Due_Date: this.state.Due_Date,
-              Status: this.state.Status,
-              Comments: this.state.Comments,
-              Vendor: this.state.Vendor,
-              Total_Price: this.state.Total_Price,
-              Quotation_Document_URL: res.data
-            })
-        }).then(this.props.cancel())
-      }).catch(err => console.log(err));
+      }).then(comments => {
+        console.log('Comments: ', comments)
+        axios
+          .post("/request-details/edit", {
+            _id: this.state._id,
+            Raw_Material_Id: this.state.Raw_Material_Id,
+            Raw_Material_Code: this.state.Raw_Material_Code,
+            Quantity: this.state.Quantity,
+            Measuring_Unit: this.state.Measuring_Unit,
+            Priority: this.state.Priority,
+            Due_Date: this.state.Due_Date,
+            Status: this.state.Status,
+            Comments: this.state.Comments,
+            Vendor: this.state.Vendor,
+            Total_Price: this.state.Total_Price,
+            Quotation_Document_URL: this.props.Finance.Quotation_Document_URL
+          })
+      }).then(this.props.cancel())
+        .catch(err => console.log(err));
     };
 
     this.checkTo = () => {
-      if (this.state.Status === 'ForwardedToProduction') {
-        this.setState({ To: 'Production' })
+      if (this.state.Status === 'ForwardedToAdmin') {
+        this.setState({ To: 'Admin' })
       }
       else if (this.state.Status === 'ForwardedToFinance') {
         this.setState({ To: 'Finance' })
-      }
-      else {
-        this.setState({ To: this.props.To })
       }
     }
 
     this.loadFile = () => {
       var temp = [];
-      this.props.Purchase.Quotation_Document_URL.map((file, index) => {
+      this.props.Finance.Quotation_Document_URL.map((file, index) => {
         try {
           require(`../../../file storage/${file}`)
-          temp.push(<Box key={index}>
-            <RefLink
-              to='document'
-              target='_blank'
-              onClick={(event) => {
-                event.preventDefault();
-                window.open(require(`../../../file storage/${file}`));
-              }}
-              style={{ textDecoration: 'none', color: 'black' }}
-            >
-              {file}
-            </RefLink>
-            <ProtectedRoute
-              path='document'
-              component={require(`../../../file storage/${file}`)}
-            />
-          </Box>)
+          return (
+            temp.push(<Box key={index}>
+              <RefLink
+                to='document'
+                target='_blank'
+                onClick={(event) => {
+                  event.preventDefault();
+                  window.open(require(`../../../file storage/${file}`));
+                }}
+                style={{ textDecoration: 'none', color: 'black' }}
+              >
+                {file}
+              </RefLink>
+              <ProtectedRoute
+                path='document'
+                component={require(`../../../file storage/${file}`)}
+              />
+            </Box>)
+          )
         }
         catch (err) {
-          //console.log('called')
+          console.log('called')
           return temp.push('File not found')
         }
       })
@@ -144,6 +123,7 @@ export default class EditPurchase extends Component {
           'Finance-Accepted',
           'Finance-Rejected',
           'ForwardedToAdmin',
+          'ForwardedToPurchase'
         ];
       }
       else {
@@ -184,17 +164,18 @@ export default class EditPurchase extends Component {
     });
 
     this.setState({
-      _id: this.props.Purchase._id,
-      Raw_Material_Id: this.props.Purchase.Raw_Material_Id,
-      Raw_Material_Code: this.props.Purchase.Raw_Material_Code,
-      Quantity: this.props.Purchase.Quantity,
-      Measuring_Unit: this.props.Purchase.Measuring_Unit,
-      Priority: this.props.Purchase.Priority,
-      Due_Date: this.props.Purchase.Due_Date,
-      Status: this.props.Purchase.Status,
+      _id: this.props.Finance._id,
+      Raw_Material_Id: this.props.Finance.Raw_Material_Id,
+      Raw_Material_Code: this.props.Finance.Raw_Material_Code,
+      Quantity: this.props.Finance.Quantity,
+      Measuring_Unit: this.props.Finance.Measuring_Unit,
+      Priority: this.props.Finance.Priority,
+      Due_Date: this.props.Finance.Due_Date,
+      Status: this.props.Finance.Status,
       Comments: this.state.Comments,
-      Vendor: this.props.Purchase.Vendor,
-      Total_Price: this.props.Purchase.Total_Price
+      Vendor: this.props.Finance.Vendor,
+      Total_Price: this.props.Finance.Total_Price,
+      Quotation_Document_URL: this.props.Finance.Quotation_Document_URL
     });
   }
 
@@ -503,34 +484,11 @@ export default class EditPurchase extends Component {
                       </Select>
                     </FormControl>
                   </Box>
-                  <Box width="100%" style={style} display='flex' flexDirection='column'>
-                    <TextField
-                      disabled={this.props.disabled.comment}
-                      size='small'
-                      multiline
-                      rowsMax="3"
-                      variant="outlined"
-                      fullWidth
-                      label="Comment"
-                      value={this.state.Comments}
-                      onChange={event => {
-                        this.setState({
-                          Comments: event.target.value
-                        });
-                        console.log(event.target.value);
-                      }}
-                    ></TextField>
-                  </Box>
-                </Box>
-                <Box style={styles.boxSize2}>
-                  <Box
-                    width='100%'
-                    display={this.props.uploadFile}
-                    display='flex'
-                  >
-                    <input
-                      style={{ display: 'none' }}
-                      id="#file"
+                  <Box style={styles.boxSize2}>
+                    <Box
+                      display={this.props.uploadFile}
+                    >
+                      {/* <input
                       type='file'
                       multiple='multiple'
                       onChange={(event) => {
@@ -539,30 +497,31 @@ export default class EditPurchase extends Component {
                         })
                         console.log('temp: ', this.state.file);
                       }}
-                    />
-                    <label htmlFor='#file'>
-                      <Button
-                        style={{ display: this.props.uploadFile, marginLeft: '10px' }}
-                        variant='contained'
-                        component='span'
-                        color='default'
-                        startIcon={<CloudUploadIcon />}
-                      >
-                        Upload Quotation Document
-                      </Button>
-                    </label>
-                    <Box
-                      display={
-                        this.props.Purchase.Quotation_Document_URL.length > 0
-                          ? 'flex'
-                          : 'none'
-                      }
-                      marginLeft="10px"
-                      alignSelf='center'
-                    >
-                      {this.loadFile()}
+                    /> */}
                     </Box>
+                    {this.loadFile()}
                   </Box>
+                </Box>
+                <Box width="100%" style={style} display='flex' flexDirection='column'>
+                  <Box>From: {this.props.From}</Box>
+                  <Box>To: {this.props.To}</Box>
+                  <Box pb={1}>Last Comment : {this.props.logComments}</Box>
+                  <TextField
+                    disabled={this.props.disabled.comment}
+                    size='small'
+                    multiline
+                    rowsMax="3"
+                    variant="outlined"
+                    fullWidth
+                    label="Comment"
+                    value={this.state.Comments}
+                    onChange={event => {
+                      this.setState({
+                        Comments: event.target.value
+                      });
+                      console.log(event.target.value);
+                    }}
+                  ></TextField>
                 </Box>
               </Box>
             </Box>
@@ -590,20 +549,6 @@ export default class EditPurchase extends Component {
               {this.props.disabled.btnText}
             </Button>
           </Box>
-          <Box marginLeft='10px' display='flex'>
-            <Button
-              variant="contained"
-              color="primary"
-              size="large"
-              fontWeight="bold"
-              onClick={this.setState({
-                openDialog: true
-              })}
-              style={{ fontWeight: 'bold' }}
-            >
-              Add Invoice
-            </Button>
-          </Box>
           <Box marginLeft='10px' display={this.props.disabled.btnDisplay}>
             <Button
               variant="contained"
@@ -617,45 +562,6 @@ export default class EditPurchase extends Component {
             </Button>
           </Box>
         </Box>
-        <Dialog open={this.state.openDialog} onBackdropClick={this.closeDialog()}>
-          <DialogContent>
-            <h3>Add to Stock</h3>
-            <Box style={styles.boxSize2}>
-              <Box width="100%" style={style} display='flex' flexDirection='column'>
-                <TextField
-                  // disabled={this.props.disabled.comment}
-                  size='small'
-                  rowsMax="3"
-                  variant="outlined"
-                  fullWidth
-                  label="Invoice Amount"
-                //value={this.state.Comments}
-                // onChange={event => {
-                //   this.setState({
-                //     Comments: event.target.value
-                //   });
-                //   console.log(event.target.value);
-                // }}
-                ></TextField>
-                <TextField
-                  // disabled={this.props.disabled.comment}
-                  size='small'
-                  rowsMax="3"
-                  variant="outlined"
-                  fullWidth
-                  label="Invoice Amount"
-                //value={this.state.Comments}
-                // onChange={event => {
-                //   this.setState({
-                //     Comments: event.target.value
-                //   });
-                //   console.log(event.target.value);
-                // }}
-                ></TextField>
-              </Box>
-            </Box>
-          </DialogContent>
-        </Dialog>
       </Box>
     );
   }
