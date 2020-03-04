@@ -82,7 +82,7 @@ export default class Manage_Finance extends Component {
         };
         this.handleClose = () => {
             axios.get("/request-details").then(res => {
-                console.log('reqDetials: ', res.data);
+                console.log('reqDetails: ', res.data);
                 var temp = [];
                 for (let i = 0; i < res.data.length; i++) {
 

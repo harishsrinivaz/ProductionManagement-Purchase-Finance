@@ -142,7 +142,7 @@ export default class ManagePurchase extends Component {
     }
     this.handleClose = () => {
       axios.get("/request-details").then(res => {
-        //console.log('reqDetails: ', res.data);
+        console.log('reqDetails: ', res.data);
         for (let i = 0; i < res.data.length; i++) {
           res.data[i].id = i + 1;
           this.munit(res, i);

@@ -16,6 +16,7 @@ import { Datepick } from "./Date/Datepick";
 import ProtectedRoute from '../../Auth/ProtectedRoute'
 import { Link as RefLink } from 'react-router-dom'
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import Stock from './Add_Purchase_Stock'
 
 const styles = Styles;
 const style = {
@@ -39,14 +40,19 @@ export default class EditPurchase extends Component {
       Vendor: "",
       errors: [],
       success: false,
-      measuring_units: [],
+      unitList: [],
       materials: [],
-      vendors: [],
+      vendorList: [],
       logComments: '',
       To: 'Finance',
       file: '',
-      openDialog: false
+      openDialog: false,
+      vendorInfo: false
     };
+
+    this.openDialog = () => {
+      this.setState({ openDialog: true })
+    }
 
     this.closeDialog = () => {
       this.setState({ openDialog: false })
@@ -137,33 +143,49 @@ export default class EditPurchase extends Component {
     }
 
     this.loadStatus = () => {
-      let status = [];
-      if (this.props.dept === 'Finance') {
-        status = [
-          'ForwardedToFinance',
-          'Finance-Accepted',
-          'Finance-Rejected',
-          'ForwardedToAdmin',
-        ];
-      }
-      else {
-        status = [
-          'Requesting',
-          'ForwardedToFinance',
-          'Purchase-Delivered',
-          'Purchase-Rejected',
-          'Purchase-Inprogress',
-        ];
-      }
+      let status = [
+        'ForwardedToFinance',
+        'Purchase-Accepted',
+        'Purchase-Rejected',
+        'Purchase-Inprogress',
+        'Purchase-Completed',
+        'ForwardedToProduction'
+      ];
       return (
         status.map((msg, index) => (
-          <MenuItem key={index} value={msg} disabled={(msg === 'ForwardedToFinance' && props.action === 'Finance') || msg === 'Requesting'}>{msg}</MenuItem>
+          <MenuItem key={index} value={msg} >{msg}</MenuItem>
         )))
+    }
+
+    this.vendorInfo = () => {
+      let temp = [];
+      this.state.vendorList.map((vendor, index) => {
+        if (vendor._id === this.state.Vendor) {
+          console.log('matched')
+          temp.push(
+            <Box key={index}>
+              <h4 style={{ padding: '0px', margin: '0px' }}>Vendor:</h4>
+              {`        ${vendor.vendor_name} - ${vendor.vendor_mobile_no} - ${vendor.vendor_email}`} <br />
+              <h4 style={{ padding: '0px', margin: '0px' }}>Point of contacts:</h4>
+              {vendor.vendor_point_of_contact.map((poc, key) => (
+                <Box key={key}>
+                  {poc.name + " ( " + poc.designation + " ) - " + poc.mobile_no}
+                </Box>
+              ))
+              }
+            </Box>
+          )
+        }
+        else {
+          console.log('not match')
+        }
+      })
+      return temp;
     }
   }
 
   componentDidMount() {
-    console.log('Props: ', this.props.Purchase);
+    //console.log('Props: ', this.props.Purchase);
     axios.get("/raw-material").then(res => {
       console.log(res);
       this.setState({
@@ -173,13 +195,13 @@ export default class EditPurchase extends Component {
     axios.get("/vendors").then(res => {
       console.log(res);
       this.setState({
-        vendors: [...res.data.Vendors]
+        vendorList: [...res.data.Vendors]
       });
     });
     axios.get("/measuring-unit/measuring-units").then(res => {
       console.log(res);
       this.setState({
-        measuring_units: [...res.data.MeasuringUnits]
+        unitList: [...res.data.MeasuringUnits]
       });
     });
 
@@ -201,7 +223,7 @@ export default class EditPurchase extends Component {
   render() {
     return (
       <Box style={styles.box}>
-        <Box fontSize="30px" mb={3}>
+        <Box fontSize="30px" mb={3} fontWeight='bold'>
           Request Details
         </Box>
         {this.state.errors.length > 0 ? (
@@ -338,7 +360,7 @@ export default class EditPurchase extends Component {
                           console.log(event.target.value);
                         }}
                       >
-                        {this.state.measuring_units.map(
+                        {this.state.unitList.map(
                           (measuring_unit, index) => {
                             return (
                               <MenuItem
@@ -384,7 +406,7 @@ export default class EditPurchase extends Component {
                           });
                         }}
                       >
-                        {this.state.vendors.map((vendor, index) => {
+                        {this.state.vendorList.map((vendor, index) => {
                           return (
                             <MenuItem
                               //selected
@@ -590,18 +612,38 @@ export default class EditPurchase extends Component {
               {this.props.disabled.btnText}
             </Button>
           </Box>
-          <Box marginLeft='10px' display='flex'>
+          <Box marginLeft='10px' display={this.state.Vendor !== '' ? 'flex' : 'none'}>
             <Button
               variant="contained"
               color="primary"
               size="large"
               fontWeight="bold"
-              onClick={this.setState({
-                openDialog: true
-              })}
+              onClick={() => {
+                this.setState({
+                  vendorInfo: true,
+                })
+                this.openDialog();
+              }}
               style={{ fontWeight: 'bold' }}
             >
-              Add Invoice
+              Vendor Info
+            </Button>
+          </Box>
+          <Box marginLeft='10px' display={this.props.Purchase.Status === 'Finance-Accepted' ? 'flex' : 'none'}>
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              fontWeight="bold"
+              onClick={() => {
+                this.setState({
+                  vendorInfo: false
+                })
+                this.openDialog();
+              }}
+              style={{ fontWeight: 'bold' }}
+            >
+              Add Stock
             </Button>
           </Box>
           <Box marginLeft='10px' display={this.props.disabled.btnDisplay}>
@@ -617,43 +659,22 @@ export default class EditPurchase extends Component {
             </Button>
           </Box>
         </Box>
-        <Dialog open={this.state.openDialog} onBackdropClick={this.closeDialog()}>
+        <Dialog open={this.state.openDialog} onBackdropClick={this.closeDialog} maxWidth='sm' fullWidth>
           <DialogContent>
-            <h3>Add to Stock</h3>
-            <Box style={styles.boxSize2}>
-              <Box width="100%" style={style} display='flex' flexDirection='column'>
-                <TextField
-                  // disabled={this.props.disabled.comment}
-                  size='small'
-                  rowsMax="3"
-                  variant="outlined"
-                  fullWidth
-                  label="Invoice Amount"
-                //value={this.state.Comments}
-                // onChange={event => {
-                //   this.setState({
-                //     Comments: event.target.value
-                //   });
-                //   console.log(event.target.value);
-                // }}
-                ></TextField>
-                <TextField
-                  // disabled={this.props.disabled.comment}
-                  size='small'
-                  rowsMax="3"
-                  variant="outlined"
-                  fullWidth
-                  label="Invoice Amount"
-                //value={this.state.Comments}
-                // onChange={event => {
-                //   this.setState({
-                //     Comments: event.target.value
-                //   });
-                //   console.log(event.target.value);
-                // }}
-                ></TextField>
-              </Box>
-            </Box>
+            {this.state.vendorInfo === true ?
+              (
+                <Box display='flex' flexDirection='column'>
+                  <Box fontSize="25px" mb={3} textAlign='center' fontWeight='bold'>
+                    Vendor Information
+                  </Box>
+                  {this.vendorInfo()}
+                </Box>
+              ) :
+              (< Stock
+                Purchase={this.props.Purchase}
+                closeDialog={this.closeDialog}
+              />)
+            }
           </DialogContent>
         </Dialog>
       </Box>

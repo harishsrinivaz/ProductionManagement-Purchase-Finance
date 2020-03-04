@@ -22,5 +22,6 @@ app.use('/vendors', require('./Routes/VendorsRoute'))
 app.use('/logs', require('./Routes/LogsRoute'))
 app.use('/measuring-unit', require('./Routes/measuringUnit'))
 app.use('/files', require('./Routes/FilesRoute'))
+app.use('/purchase-stocks', require('./Routes/PurchaseStocksRoute'))
 
-app.listen(PORT, () => { console.log('Server running...') })
+app.listen(PORT, () => { console.log('Server running...') }) 
