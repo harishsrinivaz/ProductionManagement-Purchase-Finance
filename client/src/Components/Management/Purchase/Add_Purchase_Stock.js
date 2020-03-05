@@ -49,6 +49,19 @@ class Add_Purchase_Stock extends Component {
                     <MenuItem key={index} value={msg} >{msg}</MenuItem>
                 )))
         }
+
+        this.showFile = () => {
+            let temp = [];
+            for (let i = 0; i < this.state.file.length; i++) {
+                temp.push(
+                    <Box key={i}>
+                        {this.state.file[i].name}
+                    </Box>
+                )
+            }
+            return temp
+        }
+
         this.loadFile = () => {
             var temp = [];
             this.props.Purchase.Quotation_Document_URL.map((file, index) => {
@@ -100,66 +113,6 @@ class Add_Purchase_Stock extends Component {
             <Box display='flex' flexDirection='column' alignItems='center'>
                 <Box fontSize="30px" mb={3} fontWeight="bold">
                     Add to Stock
-                </Box>
-                <Box style={styles.boxSize2}>
-                    <Box width="100%" style={style}>
-                        <TextField
-                            size="small"
-                            fullWidth
-                            variant="outlined"
-                            label="Quantity"
-                            required
-                            value={this.state.quantity}
-                            onChange={(event) => {
-                                this.setState({
-                                    quantity: event.target.value
-                                })
-                            }}
-                        ></TextField>
-                    </Box>
-                    <Box width="100%" style={style}>
-                        <FormControl
-                            required
-                            variant="outlined"
-                            fullWidth
-                            size="small"
-                        >
-                            <InputLabel
-                                style={{
-                                    backgroundColor: "white",
-                                    paddingLeft: "2px",
-                                    paddingRight: "2px"
-                                }}
-                            >
-                                Measuring Unit
-                        </InputLabel>
-                            <Select
-                                name="Measuring_Unit"
-                                variant="outlined"
-                                value={this.state.munit}
-                                onChange={(event) => {
-                                    this.setState({
-                                        munit: event.target.value
-                                    })
-                                }}
-                                required
-                            >
-                                {this.state.measuring_units.map(
-                                    (measuring_unit, index) => {
-                                        return (
-                                            <MenuItem
-                                                selected
-                                                key={index}
-                                                value={measuring_unit._id}
-                                            >
-                                                {measuring_unit.measuring_unit_name}
-                                            </MenuItem>
-                                        );
-                                    }
-                                )}
-                            </Select>
-                        </FormControl>
-                    </Box>
                 </Box>
                 <Box style={styles.boxSize2}>
                     <Box width="100%" style={style}>
@@ -224,7 +177,7 @@ class Add_Purchase_Stock extends Component {
                             disabled={false}
                             id="4"
                             variant="outlined"
-                            Name="Due_Date"
+                            Name="Invoice_Date"
                             value={this.state.Due_Date}
                             setDate={date => {
                                 this.setState({
@@ -265,33 +218,38 @@ class Add_Purchase_Stock extends Component {
                         width='100%'
                         display={this.props.uploadFile}
                         display='flex'
+                        flexDirection='column'
                     >
                         <input
                             style={{ display: 'none' }}
-                            id="#file"
+                            id="#file2"
                             type='file'
                             multiple='multiple'
                             onChange={(event) => {
+                                let temp = event.target.files;
                                 this.setState({
-                                    file: event.target.files
+                                    file: temp
                                 })
+                                console.log('temp: ', temp)
                             }}
                         />
-                        <label htmlFor='#file'>
+                        <label htmlFor='#file2'>
                             <Button
-                                style={{ display: this.props.uploadFile, marginLeft: '10px' }}
+                                style={{ marginLeft: '10px' }}
                                 variant='contained'
                                 component='span'
                                 color='default'
                                 startIcon={<CloudUploadIcon />}
                             >
-                                Upload Invoice Document
+                                Upload Invoice
                             </Button>
                         </label>
-
+                        <Box style={{ marginLeft: '10px', paddingTop: '5px' }}>
+                            {this.showFile()}
+                        </Box>
                         <Box
                             display={
-                                this.props.Purchase.Quotation_Document_URL.length > 0
+                                this.state.invoice_document_url.length > 0
                                     ? 'flex'
                                     : 'none'
                             }

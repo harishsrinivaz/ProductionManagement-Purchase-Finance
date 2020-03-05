@@ -183,7 +183,7 @@ export default class ManagePurchase extends Component {
         <Box fontSize="30px" mb={3} fontWeight="bold">
           Request Details
         </Box>
-        <Box display='flex' justifyContent='flex-start' width='100%' pb={2}>
+        {/* <Box display='flex' justifyContent='flex-start' width='100%' pb={2}>
           <Button
             variant='contained'
             color='primary'
@@ -191,7 +191,7 @@ export default class ManagePurchase extends Component {
             // style={{ fontWeight: 'bold' }}
             onClick={this.loadAccepted}
           >Finance Accepted</Button>
-        </Box>
+        </Box> */}
         <MaterialTable
           title=" "
           columns={this.state.columns}

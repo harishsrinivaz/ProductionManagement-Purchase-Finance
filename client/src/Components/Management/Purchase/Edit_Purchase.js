@@ -29,15 +29,15 @@ export default class EditPurchase extends Component {
     this.state = {
       _id: "",
       Raw_Material_Id: "Raw_material_Id",
-      Raw_Material_Code: "",
-      Quantity: "",
-      Measuring_Unit: "",
-      Priority: "",
+      Raw_Material_Code: null,
+      Quantity: null,
+      Measuring_Unit: '',
+      Priority: '',
       Due_Date: null,
-      Status: "",
-      Comments: "",
-      Total_Price: "",
-      Vendor: "",
+      Status: '',
+      Comments: '',
+      Total_Price: null,
+      Vendor: '',
       errors: [],
       success: false,
       unitList: [],
@@ -111,6 +111,18 @@ export default class EditPurchase extends Component {
       }
     }
 
+    this.showFile = () => {
+      let temp = [];
+      for (let i = 0; i < this.state.file.length; i++) {
+        temp.push(
+          <Box key={i}>
+            {this.state.file[i].name}
+          </Box>
+        )
+      }
+      return temp
+    }
+
     this.loadFile = () => {
       var temp = [];
       this.props.Purchase.Quotation_Document_URL.map((file, index) => {
@@ -165,7 +177,7 @@ export default class EditPurchase extends Component {
           temp.push(
             <Box key={index}>
               <h4 style={{ padding: '0px', margin: '0px' }}>Vendor:</h4>
-              {`        ${vendor.vendor_name} - ${vendor.vendor_mobile_no} - ${vendor.vendor_email}`} <br />
+              {`${vendor.vendor_name} - ${vendor.vendor_mobile_no} - ${vendor.vendor_email}`} <br />
               <h4 style={{ padding: '0px', margin: '0px' }}>Point of contacts:</h4>
               {vendor.vendor_point_of_contact.map((poc, key) => (
                 <Box key={key}>
@@ -255,7 +267,7 @@ export default class EditPurchase extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
                         }}
                       >
                         Material Name
@@ -302,7 +314,6 @@ export default class EditPurchase extends Component {
                       variant="outlined"
                       label="Material_Code"
                       required
-                      name="Material_Code"
                       value={this.state.Raw_Material_Code}
                       onChange={event => {
                         this.setState({
@@ -322,7 +333,16 @@ export default class EditPurchase extends Component {
                       variant="outlined"
                       label="Quantity"
                       required
-                      name="Quantity"
+                      inputProps={{
+                        style: {
+                          color: 'black'
+                        }
+                      }}
+                      InputLabelProps={{
+                        style: {
+                          color: 'black'
+                        }
+                      }}
                       value={this.state.Quantity}
                       onChange={event => {
                         this.setState({
@@ -342,7 +362,8 @@ export default class EditPurchase extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
+                          color: 'black'
                         }}
                       >
                         Measuring Unit
@@ -353,6 +374,7 @@ export default class EditPurchase extends Component {
                         variant="outlined"
                         required
                         value={this.state.Measuring_Unit}
+                        style={{ color: 'black' }}
                         onChange={event => {
                           this.setState({
                             Measuring_Unit: event.target.value
@@ -389,7 +411,8 @@ export default class EditPurchase extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
+                          color: 'black'
                         }}
                       >
                         Vendor Name
@@ -399,6 +422,7 @@ export default class EditPurchase extends Component {
                         variant="outlined"
                         required
                         name="Vendor"
+                        style={{ color: 'black' }}
                         value={this.state.Vendor}
                         onChange={event => {
                           this.setState({
@@ -422,13 +446,22 @@ export default class EditPurchase extends Component {
                   </Box>
                   <Box width="50%" style={style}>
                     <TextField
-                      disabled={this.props.disabled.vendor}
+                      disabled={this.props.disabled.amount}
                       size="small"
                       fullWidth
                       variant="outlined"
                       label="Total_Price"
                       required
-                      name="Total_Price"
+                      InputLabelProps={{
+                        style: {
+                          color: 'black'
+                        }
+                      }}
+                      inputProps={{
+                        style: {
+                          color: 'black'
+                        }
+                      }}
                       value={this.state.Total_Price}
                       onChange={event => {
                         this.setState({
@@ -460,12 +493,7 @@ export default class EditPurchase extends Component {
                         variant="outlined"
                         required
                         name="Priority"
-                        value={this.state.Priority}
-                        onChange={event => {
-                          this.setState({
-                            Priority: event.target.value
-                          });
-                        }}
+                        value={this.props.Purchase.Priority}
                       >
                         <MenuItem value="Priority" disabled>
                           Priority
@@ -504,7 +532,8 @@ export default class EditPurchase extends Component {
                         style={{
                           backgroundColor: "white",
                           paddingLeft: "2px",
-                          paddingRight: "2px"
+                          paddingRight: "2px",
+                          color: 'black'
                         }}
                       >
                         Status
@@ -514,6 +543,7 @@ export default class EditPurchase extends Component {
                         variant="outlined"
                         required
                         name="Status"
+                        style={{ color: 'black' }}
                         value={this.state.Status}
                         onChange={event => {
                           this.setState({
@@ -534,6 +564,11 @@ export default class EditPurchase extends Component {
                       variant="outlined"
                       fullWidth
                       label="Comment"
+                      InputLabelProps={{
+                        style: {
+                          color: 'black'
+                        }
+                      }}
                       value={this.state.Comments}
                       onChange={event => {
                         this.setState({
@@ -562,17 +597,22 @@ export default class EditPurchase extends Component {
                         console.log('temp: ', this.state.file);
                       }}
                     />
-                    <label htmlFor='#file'>
-                      <Button
-                        style={{ display: this.props.uploadFile, marginLeft: '10px' }}
-                        variant='contained'
-                        component='span'
-                        color='default'
-                        startIcon={<CloudUploadIcon />}
-                      >
-                        Upload Quotation Document
+                    <Box display='flex' flexDirection='column'>
+                      <label htmlFor='#file'>
+                        <Button
+                          style={{ display: this.props.uploadFile, marginLeft: '10px' }}
+                          variant='contained'
+                          component='span'
+                          color='default'
+                          startIcon={<CloudUploadIcon />}
+                        >
+                          Upload Quotation
                       </Button>
-                    </label>
+                      </label>
+                      <Box style={{ marginLeft: '10px', paddingTop: '5px' }}>
+                        {this.showFile()}
+                      </Box>
+                    </Box>
                     <Box
                       display={
                         this.props.Purchase.Quotation_Document_URL.length > 0
@@ -612,7 +652,7 @@ export default class EditPurchase extends Component {
               {this.props.disabled.btnText}
             </Button>
           </Box>
-          <Box marginLeft='10px' display={this.state.Vendor !== '' ? 'flex' : 'none'}>
+          <Box marginLeft='10px' display={this.state.Vendor !== null ? 'flex' : 'none'}>
             <Button
               variant="contained"
               color="primary"
@@ -659,7 +699,15 @@ export default class EditPurchase extends Component {
             </Button>
           </Box>
         </Box>
-        <Dialog open={this.state.openDialog} onBackdropClick={this.closeDialog} maxWidth='sm' fullWidth>
+        <Dialog
+          open={this.state.openDialog}
+          onBackdropClick={() => {
+            return this.state.vendorInfo === true ? this.closeDialog() : (<Box></Box>);
+          }
+          }
+          maxWidth='sm'
+          fullWidth
+        >
           <DialogContent>
             {this.state.vendorInfo === true ?
               (
@@ -673,6 +721,7 @@ export default class EditPurchase extends Component {
               (< Stock
                 Purchase={this.props.Purchase}
                 closeDialog={this.closeDialog}
+                upload={this.props.uploadFile}
               />)
             }
           </DialogContent>
