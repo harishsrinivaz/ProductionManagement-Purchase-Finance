@@ -100,7 +100,7 @@ class Add_Purchase_Stock extends Component {
         }
 
         this.onSubmit = () => {
-            if ((isNaN(this.state.invoice_quantity) || (this.state.invoice_quantity === null)) || isNaN(this.state.invoice_amount)
+            if (isNaN(this.state.invoice_quantity) || this.state.invoice_quantity === null || isNaN(this.state.invoice_amount)
                 || this.state.munit === "" || this.state.invoice_date === null
                 || this.state.file.length === 0
             ) {
