@@ -4,6 +4,9 @@ import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import { Datepick } from "./Date/Datepick";
 import ProtectedRoute from '../../Auth/ProtectedRoute'
 import { Link as RefLink } from 'react-router-dom'
+import AddBoxOutlinedIcon from "@material-ui/icons/AddBoxOutlined";
+import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
+
 import {
     Box,
     TextField,
@@ -25,15 +28,18 @@ class Add_Purchase_Stock extends Component {
     constructor(props) {
         super();
         this.state = {
-            quantity: 0,
-            measuring_units: [],
+            invoice_quantity: null,
+            unitList: [],
             munit: '',
             vendors: [],
             vendor: '',
-            invoice_amount: 0,
+            invoice_amount: null,
             invoice_date: null,
             invoice_document_url: [],
-            file: []
+            file: [],
+            Id: [{ id: "" }],
+            a_id: '',
+            idType: null
         }
         this.loadStatus = () => {
             let status = [
@@ -93,13 +99,23 @@ class Add_Purchase_Stock extends Component {
             return temp
         }
 
+        this.onSubmit = () => {
+            if ((isNaN(this.state.invoice_quantity) || (this.state.invoice_quantity === null)) || isNaN(this.state.invoice_amount)
+                || this.state.munit === "" || this.state.invoice_date === null
+                || this.state.file.length === 0
+            ) {
+                alert('Some fields contain invalid value!')
+            }
+            else {
+                this.props.closeDialog()
+            }
+        }
     }
-
 
     componentDidMount() {
         axios.get("/measuring-unit/measuring-units").then(res => {
             this.setState({
-                measuring_units: [...res.data.MeasuringUnits]
+                unitList: [...res.data.MeasuringUnits]
             });
         });
         axios.get("/vendors").then(res => {
@@ -108,6 +124,7 @@ class Add_Purchase_Stock extends Component {
             });
         });
     }
+
     render() {
         return (
             <Box display='flex' flexDirection='column' alignItems='center'>
@@ -115,6 +132,21 @@ class Add_Purchase_Stock extends Component {
                     Add to Stock
                 </Box>
                 <Box style={styles.boxSize2}>
+                    <Box width="100%" style={style}>
+                        <TextField
+                            size="small"
+                            fullWidth
+                            variant="outlined"
+                            label="Invoice_Quantity"
+                            required
+                            value={this.state.invoice_quantity}
+                            onChange={event => {
+                                this.setState({
+                                    invoice_quantity: event.target.value
+                                });
+                            }}
+                        ></TextField>
+                    </Box>
                     <Box width="100%" style={style}>
                         <FormControl
                             required
@@ -126,59 +158,63 @@ class Add_Purchase_Stock extends Component {
                                 style={{
                                     backgroundColor: "white",
                                     paddingLeft: "2px",
-                                    paddingRight: "2px"
+                                    paddingRight: "2px",
                                 }}
                             >
-                                Vendor Name
+                                Measuring Unit
                         </InputLabel>
                             <Select
+                                name="Measuring_Unit"
                                 variant="outlined"
                                 required
-                                value={this.state.vendor}
-                                onChange={(event) => {
+                                value={this.state.munit}
+                                onChange={event => {
                                     this.setState({
-                                        vendor: event.target.value
-                                    })
+                                        munit: event.target.value
+                                    });
+                                    console.log(event.target.value);
                                 }}
                             >
-                                {this.state.vendors.map((vendor, index) => {
-                                    return (
-                                        <MenuItem
-                                            //selected
-                                            key={index}
-                                            value={vendor._id}
-                                        >
-                                            {vendor.vendor_name}
-                                        </MenuItem>
-                                    );
-                                })}
+                                {this.state.unitList.map(
+                                    (measuring_unit, index) => {
+                                        return (
+                                            <MenuItem
+                                                selected
+                                                key={index}
+                                                value={measuring_unit._id}
+                                            >
+                                                {measuring_unit.measuring_unit_name}
+                                            </MenuItem>
+                                        );
+                                    }
+                                )}
                             </Select>
                         </FormControl>
                     </Box>
+                </Box>
+                <Box style={styles.boxSize2}>
                     <Box width="100%" style={style}>
                         <TextField
-                            size='small'
-                            rowsMax="3"
-                            variant="outlined"
+                            size="small"
                             fullWidth
-                            label="Invoice Amount"
+                            variant="outlined"
+                            label="Invoice_Amount"
+                            required
                             value={this.state.invoice_amount}
-                            onChange={(event) => {
+                            onChange={event => {
                                 this.setState({
                                     invoice_amount: event.target.value
-                                })
+                                });
                             }}
                         ></TextField>
                     </Box>
-                </Box>
-                <Box style={styles.boxSize2}>
                     <Box width="100%" style={style}>
                         <Datepick
                             disabled={false}
                             id="4"
                             variant="outlined"
                             Name="Invoice_Date"
-                            value={this.state.Due_Date}
+                            value={this.state.invoice_date}
                             setDate={date => {
                                 this.setState({
                                     invoice_date: date
@@ -187,6 +223,8 @@ class Add_Purchase_Stock extends Component {
                             }}
                         />
                     </Box>
+                </Box>
+                <Box style={styles.boxSize2}>
                     <Box width="100%" style={style}>
                         <FormControl
                             required
@@ -212,10 +250,110 @@ class Add_Purchase_Stock extends Component {
                             </Select>
                         </FormControl>
                     </Box>
+                    <Box width="100%" style={style}>
+                        <FormControl
+                            required
+                            variant="outlined"
+                            fullWidth
+                            size="small"
+                        >
+                            <InputLabel
+                                style={{
+                                    backgroundColor: "white",
+                                    paddingLeft: "2px",
+                                    paddingRight: "2px",
+                                }}
+                            >
+                                Id Type
+                            </InputLabel>
+
+                            <Select
+                                variant="outlined"
+                                required
+                                value={this.state.idType}
+                                onChange={event => {
+                                    this.setState({
+                                        idType: event.target.value
+                                    });
+                                }}
+                            >
+                                <MenuItem value='Box'>Box</MenuItem>
+                                <MenuItem value='Individual'>Individual</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Box>
                 </Box>
                 <Box style={styles.boxSize2}>
                     <Box
-                        width='100%'
+                        width="100%"
+                        style={style}
+                        display='flex'
+                        flexWrap='wrap'
+                        flexDirection='row'
+                    >
+                        {this.state.Id.map((poc, index) => {
+                            return (
+                                <Box
+                                    display="flex"
+                                    alignItems='center'
+                                    width='100%'
+                                >
+                                    <TextField
+                                        size="small"
+                                        fullWidth
+                                        variant="outlined"
+                                        label="Id"
+                                        required
+                                        value={this.state.Id[index].id}
+                                        onChange={event => {
+                                            this.setState({
+                                                a_id: event.target.value
+                                            });
+                                            console.log(event.target.value);
+                                            this.setState(prevState => {
+                                                prevState.Id[index].id = prevState.a_id;
+                                            });
+                                        }}
+                                    ></TextField>
+
+                                    {this.state.Id.length === index + 1 ? (
+                                        <AddBoxOutlinedIcon
+                                            color="secondary"
+                                            style={{
+                                                display: 'flex',
+                                            }}
+                                            onClick={() => {
+                                                this.setState({});
+                                                this.setState(prevState => {
+                                                    prevState.Id.push({
+                                                        id: ""
+                                                    });
+                                                    console.log(prevState.Id);
+                                                });
+                                            }}
+                                        />
+                                    ) : (
+                                            <DeleteOutlineIcon
+                                                color="secondary"
+                                                style={{
+                                                    display: 'flex',
+                                                }}
+                                                onClick={() => {
+                                                    this.setState({});
+                                                    this.setState(prevState => {
+                                                        prevState.Id.splice(index, 1);
+                                                        console.log(prevState.Id);
+                                                    });
+                                                }}
+                                            />
+                                        )}
+                                </Box>
+                            );
+                        }).reverse()}
+                    </Box>
+                </Box>
+                <Box style={styles.boxSize2}>
+                    <Box
                         display={this.props.uploadFile}
                         display='flex'
                         flexDirection='column'
@@ -289,7 +427,7 @@ class Add_Purchase_Stock extends Component {
                             color="primary"
                             size="large"
                             fontWeight="bold"
-                            onClick={this.props.closeDialog}
+                            onClick={this.onSubmit}
                             style={{ fontWeight: 'bold' }}
                         >
                             Submit
