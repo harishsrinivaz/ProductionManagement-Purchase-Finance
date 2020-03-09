@@ -12,8 +12,15 @@ const schema = new Schema({
     Due_Date: { type: Date, required: true },
     Quotation_Document_URL: { type: Array, required: true },
     Status: { type: String, required: true },
-    Entry_Date: { type: Date, default: Date.now, required: true },
-    Comments: { type: String }
+    Entry_Date: { type: Date, default: Date.now },
+    Comments: { type: String, default: 'no comments' },
+    Invoice_Quantity: { type: Number },
+    Invoice_Measuring_Unit: { type: String },
+    Id_Type: { type: String },
+    Id: { type: Array },
+    Invoice_Amount: { type: Number },
+    Invoice_Date: { type: Date },
+    Invoice_Document: { type: Array }
 }
 );
 

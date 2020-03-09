@@ -2,13 +2,13 @@ const express = require("express");
 const router = express.Router();
 const MeasuringUnit = require("../Models/MeasuringUnits");
 
-router.get("/measuring-units", (req, res) => {
+router.get("/", (req, res) => {
   MeasuringUnit.find({}).then(MeasuringUnits => {
     res.send({ MeasuringUnits });
   });
 });
 
-router.post("/measuring-unit", (req, res) => {
+router.post("/", (req, res) => {
   MeasuringUnit.find({ _id: req.body._id }).then(MeasuringUnit => {
     res.send({ MeasuringUnit });
   });

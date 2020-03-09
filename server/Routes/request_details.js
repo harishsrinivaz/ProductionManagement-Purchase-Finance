@@ -102,5 +102,38 @@ router.post("/edit", (req, res) => {
       console.log(request_details);
     });
 });
+router.post("/invoice", (req, res) => {
+  const {
+    _id,
+    Invoice_Quantity,
+    Invoice_Measuring_Unit,
+    Id_Type,
+    Id,
+    Invoice_Amount,
+    Invoice_Date,
+    Status,
+    Invoice_Document
+  } = req.body;
+
+  request_details
+    .findOneAndUpdate(
+      { _id },
+      {
+        _id,
+        Invoice_Quantity,
+        Invoice_Measuring_Unit,
+        Id_Type,
+        Id,
+        Invoice_Amount,
+        Invoice_Date,
+        Status,
+        Invoice_Document
+      }
+    )
+    .then(request_details => {
+      res.send(Invoice_Quantity);
+      console.log(request_details);
+    });
+})
 
 module.exports = router;

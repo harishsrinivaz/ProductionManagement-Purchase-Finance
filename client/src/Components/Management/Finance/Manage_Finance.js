@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import MaterialTable from "material-table";
-import { Box, DialogContent, Snackbar } from "@material-ui/core";
+import { Box, DialogContent, Snackbar, Button } from "@material-ui/core";
 import Dialog from "@material-ui/core/Dialog";
 import axios from "axios";
 import EditPurchase from "./Finance_Edit_Purchase";
@@ -12,42 +12,20 @@ export default class Manage_Finance extends Component {
         this.EditData = {};
         this.state = {
             columns: [
-                // { title: "Material ID", field: "Raw_Material_Id" },
                 { title: "Material Name", field: "Raw_Material_Id" },
                 { title: "Quantity", field: "Quantity" },
-                // { title: "Measuring Unit", field: "Measuring_Unit" },
-                //{ title: "Vendor", field: "Vendor" },
-                { title: "Total Price", field: "Total_Price" },
-                // {
-                //     title: 'Quotation Document', field: 'Quotation_Document_URL',
-                //     render: rowData => {
-                //         var recFile = rowData.Quotation_Document_URL;
-                //         try {
-                //             if (recFile.length > 0) {
-                //                 recFile.map((file) => {
-                //                     require(`../../../file storage/${file}`)
-                //                 })
-                //                 return recFile;
-                //             }
-                //             else {
-                //                 return 'File not uploaded'
-                //             }
-                //         }
-                //         catch (err) {
-                //             return 'File not found'
-                //         }
-                //     }
-                // },
-                //{ title: "Priority", field: "Priority" },
+                { title: "Measuring Unit", field: "Measuring_Unit" },
+                { title: "Priority", field: "Priority" },
                 { title: "Status", field: "Status" },
-                // { title: "From", field: "From" },
-                // { title: "To", field: "To" },
                 { title: "Comments", field: "Comments" }
             ],
             data: [],
             openAdd: false,
             openEdit: false,
             alert: false,
+            materialList: [],
+            unitList: [],
+            vendorList: [],
             fieldDisabled: {
                 quantity: false,
                 unit: false,
@@ -61,122 +39,114 @@ export default class Manage_Finance extends Component {
                 to: '',
                 uploadFile: 'flex'
             },
-            logComments: ''
+            logComments: 'no commments'
         };
         this.closeAlert = () => {
             this.setState({ alert: false })
         };
+        this.loadDetails = () => {
+            axios.get('/request-details').then(res => {
+                let temp = [];
+                console.log('Details: ', res.data)
+                for (let i = 0; i < res.data.length; i++) {
+                    res.data[i].Raw_Material_Id = this.getMaterialName(res.data[i].Raw_Material_Id);
+                    res.data[i].Measuring_Unit = this.getUnit(res.data[i].Measuring_Unit)
+                    res.data[i].Vendor = this.getVendor(res.data[i].Vendor)
+                    temp.push(res.data[i]);
+                }
+                this.setState({
+                    data: temp
+                })
+            })
+        }
         this.OnEditHandler = (event, rowData) => {
             axios
                 .post("/request-details", {
                     _id: rowData._id
                 })
                 .then(res => {
-                    //console.log(res.data[0]);
                     this.EditData = { ...res.data[0] };
-                    //console.log(this.EditData);
                     this.setState({
                         openEdit: true
                     });
                 });
         };
+        this.getMaterialName = (id) => {
+            let temp = id;
+            this.state.materialList.map(material => {
+                if (material._id === id) {
+                    temp = material.raw_material_name;
+                }
+            })
+            return temp;
+        }
+        this.getUnit = (id) => {
+            let temp = id;
+            this.state.unitList.map(unit => {
+                if (unit._id === id) {
+                    temp = unit.measuring_unit_name;
+                }
+            })
+            return temp;
+        }
+        this.getVendor = (id) => {
+            let temp = id;
+            if (id !== '') {
+                this.state.vendorList.map(vendor => {
+                    if (vendor._id === id) {
+                        temp = vendor.vendor_name;
+                    }
+                })
+            }
+            else {
+                temp = 'undefined'
+            }
+            return temp;
+        }
         this.handleClose = () => {
-            axios.get("/request-details").then(res => {
-                console.log('reqDetails: ', res.data);
-                var temp = [];
-                for (let i = 0; i < res.data.length; i++) {
+            //get Material List
+            axios.get('/raw-material').then(res => {
+                this.setState({
+                    materialList: [...res.data.RawMaterials]
+                })
+            }).catch(err => {
+                console.log('cannot get materialList', err)
+            })
 
+            //get Unit List
+            axios.get('/measuring-unit').then(res => {
+                this.setState({
+                    unitList: [...res.data.MeasuringUnits]
+                })
+            }).catch(err => {
+                console.log('cannot get unitList', err)
+            })
+
+            //get Vendor List
+            axios.get('/vendors').then(res => {
+                this.setState({
+                    vendorList: [...res.data.Vendors]
+                })
+            }).catch(err => {
+                console.log('cannot get vendorList', err)
+            })
+
+            //get Request Details
+            axios.get('/request-details').then(res => {
+                let temp = [];
+                console.log('Details: ', res.data)
+                for (let i = 0; i < res.data.length; i++) {
                     if (res.data[i].Status === 'ForwardedToFinance') {
-                        console.log('status: ', res.data[i].Status)
-                        res.data[i].id = i + 1;
-                        //temp = res.data[i];
-                        axios
-                            .post("/measuring-unit/measuring-unit", {
-                                _id: res.data[i].Measuring_Unit
-                            })
-                            .then(MeasuringUnit => {
-                                // console.log(MeasuringUnit);
-                                if (MeasuringUnit.data.MeasuringUnit[0]) {
-                                    // console.log(
-                                    //   MeasuringUnit.data.MeasuringUnit[0].measuring_unit_name
-                                    // );
-                                    res.data[i].Measuring_Unit =
-                                        MeasuringUnit.data.MeasuringUnit[0].measuring_unit_name;
-                                    this.setState({
-                                        data: [...res.data]
-                                    });
-                                } else {
-                                    res.data[i].Measuring_Unit = "problem loading Measuring Unit";
-                                    // this.setState({
-                                    //     data: [temp]
-                                    // });
-                                }
-                            });
-                        //end
-                        axios
-                            .post("/raw-material", {
-                                _id: res.data[i].Raw_Material_Id
-                                //_id: res.data[i].Product_ID
-                            })
-                            .then(MaterialId => {
-                                //console.log(MaterialId);
-                                if (MaterialId.data.RawMaterial[0]) {
-                                    // console.log(MaterialId.data.RawMaterial[0].raw_material_name);
-                                    res.data[i].Raw_Material_Id =
-                                        MaterialId.data.RawMaterial[0].raw_material_name;
-                                    this.setState({
-                                        data: [...res.data]
-                                    });
-                                } else {
-                                    res.data[i].Raw_Material_Id = "problem loading";
-                                    // this.setState({
-                                    //     data: [temp]
-                                    // });
-                                }
-                            });
-                        //end
-                        if (res.data[i].Vendor !== "") {
-                            axios
-                                .post("/vendors", {
-                                    _id: res.data[i].Vendor
-                                })
-                                .then(VendorName => {
-                                    // console.log('Vendor: ', VendorName);
-                                    if (VendorName.data.Vendor[0]) {
-                                        //  console.log(VendorName.data.Vendor[0].vendor_name);
-                                        res.data[i].Vendor = VendorName.data.Vendor[0].vendor_name;
-                                        this.setState({
-                                            data: [...res.data]
-                                        });
-                                    } else {
-                                        res.data[i].Vendor = "problem loading";
-                                        this.setState({
-                                            data: [...res.data]
-                                        });
-                                    }
-                                });
-                        }
-                        console.log(temp)
-                        //end
-                        // if (res.data[i].Comments != "") {
-                        //   axios
-                        //     .post('/logs', {
-                        //       _id: res.data[i].Comments
-                        //     })
-                        //     .then(comments => {
-                        //       console.log('Comments: ', comments);
-                        //       res.data[i].Comments = comments.data[0].Comments;
-                        //       res.data[i].From = comments.data[0].Address.From;
-                        //       res.data[i].To = comments.data[0].Address.To;
-                        //       this.setState({
-                        //         data: [...res.data]
-                        //       });
-                        //     }).catch(err => console.log(err))
-                        // }
+                        res.data[i].Raw_Material_Id = this.getMaterialName(res.data[i].Raw_Material_Id);
+                        res.data[i].Measuring_Unit = this.getUnit(res.data[i].Measuring_Unit)
+                        res.data[i].Vendor = this.getVendor(res.data[i].Vendor)
+                        temp.push(res.data[i]);
                     }
                 }
-
-            });
+                this.setState({
+                    data: temp
+                })
+            })
         };
     }
     componentDidMount() {
@@ -194,7 +164,23 @@ export default class Manage_Finance extends Component {
             >
                 <Box fontSize="30px" mb={3} fontWeight="bold">
                     Request Details
-        </Box>
+                </Box>
+                <Box display='flex' justifyContent='flex-start' width='100%' pb={2}>
+                    <Button
+                        variant='contained'
+                        color='primary'
+                        size='small'
+                        // style={{ fontWeight: 'bold' }}
+                        onClick={this.loadDetails}
+                    >Purchase Details</Button>
+                    <Button
+                        variant='contained'
+                        color='primary'
+                        size='small'
+                        style={{ marginLeft: '20px' }}
+                        onClick={this.handleClose}
+                    >Request Details</Button>
+                </Box>
                 <MaterialTable
                     title=" "
                     columns={this.state.columns}

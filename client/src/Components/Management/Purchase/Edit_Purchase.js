@@ -35,7 +35,7 @@ export default class EditPurchase extends Component {
       Priority: '',
       Due_Date: null,
       Status: '',
-      Comments: '',
+      Comments: 'no comments',
       Total_Price: null,
       Vendor: '',
       errors: [],
@@ -43,7 +43,7 @@ export default class EditPurchase extends Component {
       unitList: [],
       materials: [],
       vendorList: [],
-      logComments: '',
+      logComments: 'no comments',
       To: 'Finance',
       file: '',
       openDialog: false,
@@ -61,7 +61,7 @@ export default class EditPurchase extends Component {
     this.onEditHandler = () => {
       this.checkTo();
       const formData = new FormData();
-      console.log('L: ', this.state.file)
+      console.log('fileLength: ', this.state.file)
       for (let i = 0; i < this.state.file.length; i++) {
         formData.append('file', this.state.file[i]);
       }
@@ -156,16 +156,20 @@ export default class EditPurchase extends Component {
 
     this.loadStatus = () => {
       let status = [
+        'Requesting',
+        'Finance-Accepted',
+        'Purchase-Completed',
         'ForwardedToFinance',
         'Purchase-Accepted',
         'Purchase-Rejected',
-        'Purchase-Inprogress',
         'Purchase-Completed',
         'ForwardedToProduction'
       ];
       return (
         status.map((msg, index) => (
-          <MenuItem key={index} value={msg} >{msg}</MenuItem>
+          <MenuItem key={index} value={msg}
+            disabled={msg === 'Requesting' || msg === 'Finance-Accepted' ? true : false}
+          >{msg}</MenuItem>
         )))
     }
 
@@ -210,7 +214,7 @@ export default class EditPurchase extends Component {
         vendorList: [...res.data.Vendors]
       });
     });
-    axios.get("/measuring-unit/measuring-units").then(res => {
+    axios.get("/measuring-unit").then(res => {
       console.log(res);
       this.setState({
         unitList: [...res.data.MeasuringUnits]

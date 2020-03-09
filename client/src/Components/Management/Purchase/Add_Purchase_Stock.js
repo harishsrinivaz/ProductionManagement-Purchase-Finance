@@ -6,7 +6,6 @@ import ProtectedRoute from '../../Auth/ProtectedRoute'
 import { Link as RefLink } from 'react-router-dom'
 import AddBoxOutlinedIcon from "@material-ui/icons/AddBoxOutlined";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
-
 import {
     Box,
     TextField,
@@ -36,6 +35,7 @@ class Add_Purchase_Stock extends Component {
             invoice_amount: null,
             invoice_date: null,
             invoice_document_url: [],
+            status: '',
             file: [],
             Id: [{ id: "" }],
             a_id: '',
@@ -101,19 +101,56 @@ class Add_Purchase_Stock extends Component {
 
         this.onSubmit = () => {
             if (isNaN(this.state.invoice_quantity) || this.state.invoice_quantity === null || isNaN(this.state.invoice_amount)
-                || this.state.munit === "" || this.state.invoice_date === null
-                || this.state.file.length === 0
+                || this.state.invoice_amount === null || this.state.munit === "" || this.state.invoice_date === null
+                || this.state.file.length === 0 || this.state.status === ""
             ) {
                 alert('Some fields contain invalid value!')
             }
             else {
-                this.props.closeDialog()
+                const formData = new FormData();
+                for (let i = 0; i < this.state.file.length; i++) {
+                    formData.append('file', this.state.file[i]);
+                }
+                axios.post('/files', formData, {
+                    headers: {
+                        'content-type': 'multipart/form-data'
+                    }
+                }).then(file => {
+                    axios.post('/request-details/invoice', {
+                        _id: this.props.Purchase._id,
+                        Invoice_Quantity: this.state.invoice_quantity,
+                        Invoice_Measuring_Unit: this.state.munit,
+                        Invoice_Amount: this.state.invoice_amount,
+                        Invoice_Date: this.state.invoice_date,
+                        Invoice_Document: file.data,
+                        Id_Type: this.state.Id_Type,
+                        Id: this.state.Id,
+                        Status: this.state.status
+                    }).then(res => {
+                        axios.post('/purchase-stocks/add', {
+                            Purchase_Id: this.props.Purchase._id,
+                            Measuring_Unit: this.props.Purchase.Measuring_Unit,
+                            Total_Quantity: res.data
+                        }).then(res => {
+                            console.log(res);
+                            this.props.closeDialog();
+                        }).catch(err => {
+                            console.log('Stock not added', err)
+                        })
+                    }).catch(err => {
+                        console.log('Invoice not added', err);
+                    })
+                }).catch(err => {
+                    console.log('File not added', err)
+                })
+
+                //this.props.closeDialog()
             }
         }
     }
 
     componentDidMount() {
-        axios.get("/measuring-unit/measuring-units").then(res => {
+        axios.get("/measuring-unit").then(res => {
             this.setState({
                 unitList: [...res.data.MeasuringUnits]
             });
@@ -244,7 +281,12 @@ class Add_Purchase_Stock extends Component {
                             <Select
                                 variant="outlined"
                                 required
-                                name="Status"
+                                value={this.state.status}
+                                onChange={(event) => {
+                                    this.setState({
+                                        status: event.target.value
+                                    })
+                                }}
                             >
                                 {this.loadStatus()}
                             </Select>

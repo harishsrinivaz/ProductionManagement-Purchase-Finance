@@ -6,7 +6,9 @@ import {
   Select,
   FormControl,
   InputLabel,
-  MenuItem
+  MenuItem,
+  Dialog,
+  DialogContent
 } from "@material-ui/core";
 import axios from "axios";
 import Styles from "./styles/FormStyles";
@@ -31,18 +33,28 @@ export default class EditPurchase extends Component {
       Priority: "",
       Due_Date: null,
       Status: "",
-      Comments: "",
+      Comments: "no comments",
       Total_Price: "",
       Vendor: "",
       errors: [],
       success: false,
       measuring_units: [],
       materials: [],
-      vendors: [],
-      logComments: '',
+      vendorList: [],
+      vendorInfo: false,
+      logComments: 'no comments',
       To: 'Admin',
       file: ''
     };
+
+    this.openDialog = () => {
+      this.setState({ openDialog: true })
+    }
+
+    this.closeDialog = () => {
+      this.setState({ openDialog: false })
+    }
+
     this.onEditHandler = () => {
       this.checkTo();
       axios.post('/logs/comment', {
@@ -80,6 +92,32 @@ export default class EditPurchase extends Component {
       else if (this.state.Status === 'ForwardedToFinance') {
         this.setState({ To: 'Finance' })
       }
+    }
+
+    this.vendorInfo = () => {
+      let temp = [];
+      this.state.vendorList.map((vendor, index) => {
+        if (vendor._id === this.state.Vendor) {
+          console.log('matched')
+          temp.push(
+            <Box key={index}>
+              <h4 style={{ padding: '0px', margin: '0px' }}>Vendor:</h4>
+              {`${vendor.vendor_name} - ${vendor.vendor_mobile_no} - ${vendor.vendor_email}`} <br />
+              <h4 style={{ padding: '0px', margin: '0px' }}>Point of contacts:</h4>
+              {vendor.vendor_point_of_contact.map((poc, key) => (
+                <Box key={key}>
+                  {poc.name + " ( " + poc.designation + " ) - " + poc.mobile_no}
+                </Box>
+              ))
+              }
+            </Box>
+          )
+        }
+        else {
+          console.log('not match')
+        }
+      })
+      return temp;
     }
 
     this.loadFile = () => {
@@ -153,10 +191,10 @@ export default class EditPurchase extends Component {
     axios.get("/vendors").then(res => {
       console.log(res);
       this.setState({
-        vendors: [...res.data.Vendors]
+        vendorList: [...res.data.Vendors]
       });
     });
-    axios.get("/measuring-unit/measuring-units").then(res => {
+    axios.get("/measuring-unit").then(res => {
       console.log(res);
       this.setState({
         measuring_units: [...res.data.MeasuringUnits]
@@ -365,7 +403,7 @@ export default class EditPurchase extends Component {
                           });
                         }}
                       >
-                        {this.state.vendors.map((vendor, index) => {
+                        {this.state.vendorList.map((vendor, index) => {
                           return (
                             <MenuItem
                               //selected
@@ -484,44 +522,27 @@ export default class EditPurchase extends Component {
                       </Select>
                     </FormControl>
                   </Box>
-                  <Box style={styles.boxSize2}>
-                    <Box
-                      display={this.props.uploadFile}
-                    >
-                      {/* <input
-                      type='file'
-                      multiple='multiple'
-                      onChange={(event) => {
+                  <Box width="100%" style={style} display='flex' flexDirection='column'>
+                    <TextField
+                      disabled={this.props.disabled.comment}
+                      size='small'
+                      multiline
+                      rowsMax="3"
+                      variant="outlined"
+                      fullWidth
+                      label="Comment"
+                      value={this.state.Comments}
+                      onChange={event => {
                         this.setState({
-                          file: event.target.files
-                        })
-                        console.log('temp: ', this.state.file);
+                          Comments: event.target.value
+                        });
+                        console.log(event.target.value);
                       }}
-                    /> */}
-                    </Box>
-                    {this.loadFile()}
+                    ></TextField>
                   </Box>
                 </Box>
-                <Box width="100%" style={style} display='flex' flexDirection='column'>
-                  <Box>From: {this.props.From}</Box>
-                  <Box>To: {this.props.To}</Box>
-                  <Box pb={1}>Last Comment : {this.props.logComments}</Box>
-                  <TextField
-                    disabled={this.props.disabled.comment}
-                    size='small'
-                    multiline
-                    rowsMax="3"
-                    variant="outlined"
-                    fullWidth
-                    label="Comment"
-                    value={this.state.Comments}
-                    onChange={event => {
-                      this.setState({
-                        Comments: event.target.value
-                      });
-                      console.log(event.target.value);
-                    }}
-                  ></TextField>
+                <Box style={styles.boxSize2} ml={2}>
+                  {this.loadFile()}
                 </Box>
               </Box>
             </Box>
@@ -549,6 +570,23 @@ export default class EditPurchase extends Component {
               {this.props.disabled.btnText}
             </Button>
           </Box>
+          <Box marginLeft='10px' display={this.props.Finance.Vendor !== "" ? 'flex' : 'none'}>
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              fontWeight="bold"
+              onClick={() => {
+                this.setState({
+                  vendorInfo: true,
+                })
+                this.openDialog();
+              }}
+              style={{ fontWeight: 'bold' }}
+            >
+              Vendor Info
+            </Button>
+          </Box>
           <Box marginLeft='10px' display={this.props.disabled.btnDisplay}>
             <Button
               variant="contained"
@@ -562,6 +600,24 @@ export default class EditPurchase extends Component {
             </Button>
           </Box>
         </Box>
+        <Dialog
+          open={this.state.openDialog}
+          onBackdropClick={() => {
+            return this.state.vendorInfo === true ? this.closeDialog() : (<Box></Box>);
+          }
+          }
+          maxWidth='sm'
+          fullWidth
+        >
+          <DialogContent>
+            <Box display='flex' flexDirection='column'>
+              <Box fontSize="25px" mb={3} textAlign='center' fontWeight='bold'>
+                Vendor Information
+                  </Box>
+              {this.vendorInfo()}
+            </Box>
+          </DialogContent>
+        </Dialog>
       </Box>
     );
   }

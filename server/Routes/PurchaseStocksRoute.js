@@ -16,7 +16,7 @@ router.post("/add", (req, res) => {
             for (let i = 0; i < stock.length; i++) {
                 reqDetails.find({ _id: stock[i].Purchase_Id }).then(stockDetails => {
                     if (details[0].Raw_Material_Code === stockDetails[0].Raw_Material_Code) {
-                        let new_stock = stock[i].Total_Quantity + details[0].Quantity
+                        let new_stock = stock[i].Total_Quantity + details[0].Invoice_Quantity
                         console.log(stockDetails[0]._id)
                         stocks.findOneAndUpdate(
                             {
@@ -25,6 +25,7 @@ router.post("/add", (req, res) => {
                             {
                                 $set: {
                                     Total_Quantity: new_stock
+
                                 }
                             }
                         ).then(res => {
@@ -39,28 +40,14 @@ router.post("/add", (req, res) => {
                         if (i === stock.length - 1 && flag !== true) {
                             const {
                                 Purchase_Id,
-                                Invoice_Quantity,
-                                Measuring_Unit,
-                                Id_Type,
-                                Id,
-                                Invoice_Amount,
-                                Invoice_Date,
-                                Invoice_Document,
                                 Total_Quantity,
-                                Unit
+                                Measuring_Unit
                             } = req.body;
-
+                            console.log('stock added')
                             const new_stocks = new stocks({
                                 Purchase_Id,
-                                Invoice_Quantity,
-                                Measuring_Unit,
-                                Id_Type,
-                                Id,
-                                Invoice_Amount,
-                                Invoice_Date,
-                                Invoice_Document,
                                 Total_Quantity,
-                                Unit
+                                Measuring_Unit
                             });
                             new_stocks.save().then(stocks => {
                                 console.log("added");
@@ -69,12 +56,33 @@ router.post("/add", (req, res) => {
                         }
                     }
                 }).catch(err => {
-                    res.send('not matched')
+                    res.send('stock not matched')
+                    console.log("stock not added", err)
                 })
             }
+            if (stock.length === 0) {
+                const {
+                    Purchase_Id,
+                    Total_Quantity,
+                    Measuring_Unit
+                } = req.body;
+
+                const new_stocks = new stocks({
+                    Purchase_Id,
+                    Total_Quantity,
+                    Measuring_Unit
+                });
+                new_stocks.save().then(stocks => {
+                    console.log("added");
+                    return res.send(stocks);
+                });
+            }
+
         }).catch(err => {
             res.send('stocks not found')
+            console.log('Stock not found', err)
         }).catch(err => {
+            console.log('Not Purchased', err)
             res.send('Not Purchased')
         })
     })
