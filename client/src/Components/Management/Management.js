@@ -3,7 +3,8 @@ import { Box, Button } from '@material-ui/core';
 import Dashboard from '../Dashboard/Dashboard';
 import ManagePurchase from './Purchase/Manage_Purchase';
 import ManageFinance from './Finance/Manage_Finance';
-import ManagePurchaseStocks from './Purchase Stock/Manage_Purchase_Stocks'
+import ManagePurchaseStocks from './Purchase Stock/Manage_Purchase_Stocks';
+import ManagePurchaseWastage from './Purchase Wastage/Manage_Wastage'
 import ProtectedRoute from '../Auth/ProtectedRoute';
 import auth from '../Auth/auth';
 
@@ -12,7 +13,7 @@ const Management = (props) => {
       { Name: 'Manage Purchase', Path: 'manage-purchase' },
       { Name: 'Manage Finance', Path: 'manage-finance' },
       { Name: 'Manage Stock', Path: 'manage-purchase-stock' },
-      { Name: 'Manage Wastage', Path: 'manage-wastage' },
+      { Name: 'Manage Wastage', Path: 'manage-purchase-wastage' },
       { Name: 'Reports', Path: 'reports' },
    ];
    return (
@@ -40,6 +41,11 @@ const Management = (props) => {
                exact
                path='/management/manage-purchase-stock'
                component={ManagePurchaseStocks}
+            />
+            <ProtectedRoute
+               exact
+               path='/management/manage-purchase-wastage'
+               component={ManagePurchaseWastage}
             />
          </Box>
          <Box

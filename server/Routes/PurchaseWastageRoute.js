@@ -1,15 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const Production_Wastages = require("../models/Wastage");
+const purchaseWastages = require("../Models/Purchase_Wastages");
 
 router.get("/", (req, res) => {
-  Production_Wastages.find({}, function(err, data) {
+  Production_Wastages.find({}, function (err, data) {
     if (err) throw err;
     res.send(data);
   });
 });
 router.post("/", (req, res) => {
-  Production_Wastages.find({ _id: req.body._id }, function(err, data) {
+  Production_Wastages.find({ _id: req.body._id }, function (err, data) {
     if (err) throw err;
     res.send(data);
   });
@@ -17,8 +17,6 @@ router.post("/", (req, res) => {
 router.post("/add", (req, res) => {
   console.log("wastage list");
   const {
-    Wastage_Type,
-    Product_Name,
     Raw_Material_Id,
     Quantity,
     Id_Type,
@@ -54,8 +52,7 @@ router.post("/delete", (req, res, next) => {
 router.post("/edit", (req, res) => {
   const {
     _id,
-    Wastage_Type,
-    Product_Name,
+    Raw_Material_Name,
     Raw_Material_Id,
     Quantity,
     Id_Type,
@@ -65,13 +62,10 @@ router.post("/edit", (req, res) => {
     Description
   } = req.body;
 
-  let errors = [];
-
   Production_Wastages.findOneAndUpdate(
     { _id },
     {
-      Wastage_Type,
-      Product_Name,
+      Raw_Material_Name,
       Raw_Material_Id,
       Quantity,
       Id_Type,

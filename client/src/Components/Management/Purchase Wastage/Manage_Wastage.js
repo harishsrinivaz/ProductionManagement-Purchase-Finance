@@ -12,9 +12,7 @@ export default class ManageWastage extends Component {
     this.EditData = {};
     this.state = {
       columns: [
-        { title: "Wastage Type", field: "Wastage_Type" },
-        // { title: "Wastage Id", field: "Id" },
-        { title: "Item Name", field: "Item_Name" },
+        { title: "Material Name", field: "Item_Name" },
         { title: "Quantity", field: "Quantity" },
         { title: "Measuring Unit", field: "Measuring_Unit" }
       ],
@@ -37,7 +35,7 @@ export default class ManageWastage extends Component {
     };
     this.OnEditHandler = (event, rowData) => {
       axios
-        .post("/wastage", {
+        .post("/purchase-wastages", {
           _id: rowData._id
         })
         .then(res => {
@@ -50,13 +48,13 @@ export default class ManageWastage extends Component {
         });
     };
     this.handleClose = () => {
-      axios.get("/wastage").then(res => {
+      axios.get("/purchase-wastages").then(res => {
         console.log(res.data);
         for (let i = 0; i < res.data.length; i++) {
           res.data[i].id = i + 1;
           //Axios
           axios
-            .post("/measuring-unit/measuring-unit", {
+            .post("/measuring-unit", {
               _id: res.data[i].Measuring_Unit
             })
             .then(MeasuringUnit => {
@@ -77,61 +75,28 @@ export default class ManageWastage extends Component {
                 });
               }
             });
-          //end
-          //Axios
-          if (res.data[i].Product_Name !== "") {
-            axios
-              .post("/products/product", {
-                _id: res.data[i].Product_Name
-                //_id: res.data[i].Product_ID
-              })
-              .then(ProductName => {
-                console.log(ProductName.data.Product[0].product_name);
-                if (ProductName.data.Product) {
-                  console.log(ProductName.data.Product[0].product_name);
-                  res.data[i].Item_Name =
-                    ProductName.data.Product[0].product_name;
-                  this.setState({
-                    data: [...res.data]
-                  });
-                } else {
-                  res.data[i].Item_Name = "problem loading";
-                  this.setState({
-                    data: [...res.data]
-                  });
-                }
-              });
-          }
-          //end
-          //Axios
-          else {
-            axios
-              .post("/raw-material", {
-                _id: res.data[i].Raw_Material_Id
-                //_id: res.data[i].Product_ID
-              })
-              .then(MaterialId => {
-                console.log(MaterialId);
-                if (MaterialId.data.RawMaterial[0]) {
-                  console.log(MaterialId.data.RawMaterial[0].raw_material_name);
-                  res.data[i].Item_Name =
-                    MaterialId.data.RawMaterial[0].raw_material_name;
-                  this.setState({
-                    data: [...res.data]
-                  });
-                } else {
-                  res.data[i].Item_Name = "problem loading";
-                  this.setState({
-                    data: [...res.data]
-                  });
-                }
-              });
-          }
-          //end
+          axios
+            .post("/raw-material", {
+              _id: res.data[i].Raw_Material_Id
+            })
+            .then(MaterialId => {
+              console.log(MaterialId);
+              if (MaterialId.data.RawMaterial[0]) {
+                console.log(MaterialId.data.RawMaterial[0].raw_material_name);
+                res.data[i].Item_Name =
+                  MaterialId.data.RawMaterial[0].raw_material_name;
+                this.setState({
+                  data: [...res.data]
+                });
+              } else {
+                res.data[i].Item_Name = "problem loading";
+                this.setState({
+                  data: [...res.data]
+                });
+              }
+            });
+
         }
-        // this.setState({
-        //   data: [...res.data]
-        // });
       });
     };
   }
@@ -157,7 +122,8 @@ export default class ManageWastage extends Component {
             style={{
               marginBottom: "20px",
               display: "flex",
-              marginRight: "10px"
+              marginRight: "10px",
+              fontWeight: 'bold'
             }}
             size="large"
             onClick={() => {
@@ -169,7 +135,6 @@ export default class ManageWastage extends Component {
             Add
           </Button>
         </Box>
-
         <MaterialTable
           title=" "
           columns={this.state.columns}
@@ -183,47 +148,6 @@ export default class ManageWastage extends Component {
               fontSize: "medium",
               fontWeight: "bold"
             }
-          }}
-          actions={[
-            {
-              icon: "edit",
-              tooltip: "Edit User",
-              onClick: (event, rowData) => {
-                this.setState({
-                  fieldDisabled: {
-                    Wastage_Type: false,
-                    Product_Name: false,
-                    Raw_Material_Id: false,
-                    Quantity: false,
-                    Id_Type: false,
-                    Id: false,
-                    Measuring_Unit: false,
-                    Wastage_Date: false,
-                    Description: false,
-                    btnDisplay: "flex",
-                    btnText: "Cancel"
-                  }
-                });
-                this.OnEditHandler(event, rowData);
-              }
-            }
-          ]}
-          editable={{
-            onRowDelete: oldData =>
-              axios
-                .post("/wastage/delete", {
-                  _id: oldData._id
-                })
-                .then(Wastage => {
-                  console.log(Wastage);
-                  if (Wastage) {
-                    this.setState(prevState => {
-                      const data = [...prevState.data];
-                      data.splice(data.indexOf(oldData), 1);
-                      return { ...prevState, data };
-                    });
-                  }
-                })
           }}
           onRowClick={(event, rowData) => {
             this.setState({

@@ -8,10 +8,9 @@ import {
   InputLabel,
   MenuItem
 } from "@material-ui/core";
-// import PaperBoard from "../../../Common_Files/PaperBoard/PaperBoard";
 import axios from "axios";
-import Styles from "../../../styles/FormStyles";
-import { Datepick } from "../../../Common_Files/Date/Datepick";
+import Styles from "./styles/FormStyles";
+import { Datepick } from "./Date/Datepick";
 import AddBoxOutlinedIcon from "@material-ui/icons/AddBoxOutlined";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 
@@ -24,11 +23,9 @@ export default class AddWastage extends Component {
   constructor(props) {
     super();
     this.state = {
-      // _id: "",
-      Wastage_Type: "Product",
-      Product_Name: "",
       Raw_Material_Id: "",
       Quantity: "",
+      raw_material_code: "",
       Id_Type: "",
       Id: [{ id: "" }],
       Measuring_Unit: "",
@@ -38,19 +35,18 @@ export default class AddWastage extends Component {
       openAdd: false,
       success: false,
       materials: [],
-      products: [],
       measuring_units: [],
       a_id: ""
     };
     this.onAddHandler = () => {
       console.log("Ready to add");
       axios
-        .post("/wastage/add", {
+        .post("/purchase-wastages/add", {
           // _id: this.state._id,
-          Wastage_Type: this.state.Wastage_Type,
-          Product_Name: this.state.Product_Name,
           Raw_Material_Id: this.state.Raw_Material_Id,
           Quantity: this.state.Quantity,
+          Product_ID: this.state.Product_ID,
+          Raw_Material_Code: this.state.raw_material_code,
           Id_Type: this.state.Id_Type,
           Id: this.state.Id,
           Measuring_Unit: this.state.Measuring_Unit,
@@ -58,40 +54,21 @@ export default class AddWastage extends Component {
           Description: this.state.Description
         })
         .then(res => {
-          // // if (res.data.errors.length > 0) {
           console.log(res);
-          // this.setState({
-          //   errors: [...res.data.errors],
-          //   success: false
-          // });
-          // } else {
           this.props.cancel();
-          // }
         });
-      //.catch(err => console.log(err));
     };
   }
   componentDidMount() {
-    console.log("material");
     axios.get("/raw-material").then(res => {
       console.log(res);
       this.setState({
         materials: [...res.data.RawMaterials]
       });
-      // console.log("Product: ", this.state.products);
     });
 
-    axios.get("/products/products").then(res => {
+    axios.get("/measuring-unit").then(res => {
       console.log(res);
-      this.setState({
-        products: [...res.data.Products]
-      });
-      // console.log("Product: ", this.state.products);
-    });
-
-    axios.get("/measuring-unit/measuring-units").then(res => {
-      console.log(res);
-
       this.setState({
         measuring_units: [...res.data.MeasuringUnits]
       });
@@ -103,26 +80,12 @@ export default class AddWastage extends Component {
         <Box fontSize="30px" mb={3}>
           Add Wastage
         </Box>
-        {/* {this.state.errors.length > 0 ? (
-          this.state.errors.map((error, index) => {
-            return (
-              <Box style={styles.box_msg} bgcolor="#f73067" key={index}>
-                {error}
-              </Box>
-            );
-          })
-        ) : this.state.success === true ? ( */}
-        {/* <Box bgcolor="#3df45b" style={styles.box_msg}>
-            Successful
-          </Box> */}
-        {/* ) : null} */}
-        {/* <PaperBoard> */}
         <Box style={styles.root}>
           <Box display="flex" justifyContent="center">
             <Box style={styles.lbox}>
               <Box style={styles.form}>
                 <Box style={styles.boxSize2}>
-                  <Box width="100%" style={style}>
+                  <Box width="50%" style={style}>
                     <FormControl
                       required
                       variant="outlined"
@@ -136,127 +99,44 @@ export default class AddWastage extends Component {
                           paddingRight: "2px"
                         }}
                       >
-                        Wastage Type
-                      </InputLabel>
+                        Material Name
+                        </InputLabel>
                       <Select
                         variant="outlined"
                         required
-                        name="Wastage_Type"
-                        value={this.state.Wastage_Type}
+                        name="Raw_Material_Id"
+                        value={this.state.Raw_Material_Id}
                         onChange={event => {
+                          let materialCode;
+                          let Measuring;
+                          this.state.materials.map(material => {
+                            if (material._id === event.target.value) {
+                              materialCode = material.raw_material_code;
+                              Measuring =
+                                material.raw_material_measuring_unit;
+                              console.log("code: ", materialCode);
+                            }
+                          });
                           this.setState({
-                            Wastage_Type: event.target.value
+                            Raw_Material_Id: event.target.value,
+                            raw_material_code: materialCode,
+                            Measuring_Unit: Measuring
                           });
                         }}
                       >
-                        <MenuItem value="Wastage Type" disabled>
-                          Wastage Type
-                        </MenuItem>
-                        <MenuItem value="Product">Product</MenuItem>
-                        <MenuItem value="RawMaterial">RawMaterial</MenuItem>
+                        {this.state.materials.map((material, index) => {
+                          return (
+                            <MenuItem
+                              //selected
+                              key={index}
+                              value={material._id}
+                            >
+                              {material.raw_material_name}
+                            </MenuItem>
+                          );
+                        })}
                       </Select>
                     </FormControl>
-                  </Box>
-                </Box>
-                <Box style={styles.boxSize2}>
-                  <Box width="50%" style={style}>
-                    {this.state.Wastage_Type == "Product" ? (
-                      <FormControl
-                        required
-                        variant="outlined"
-                        fullWidth
-                        size="small"
-                      >
-                        <InputLabel
-                          style={{
-                            backgroundColor: "white",
-                            paddingLeft: "2px",
-                            paddingRight: "2px"
-                          }}
-                        >
-                          Product Name
-                        </InputLabel>
-                        <Select
-                          variant="outlined"
-                          required
-                          name="Product_Name"
-                          value={this.state.Product_Name}
-                          onChange={event => {
-                            let prodCode;
-                            this.state.products.map(product => {
-                              if (product._id === event.target.value) {
-                                prodCode = product.product_code;
-                                console.log("Procode: ", prodCode);
-                              }
-                            });
-                            this.setState({
-                              Product_Name: event.target.value,
-                              Product_ID: prodCode
-                            });
-                          }}
-                        >
-                          {this.state.products.map((product, index) => {
-                            return (
-                              <MenuItem
-                                //selected
-                                key={index}
-                                value={product._id}
-                              >
-                                {product.product_name}
-                              </MenuItem>
-                            );
-                          })}
-                        </Select>
-                      </FormControl>
-                    ) : (
-                        <FormControl
-                          required
-                          variant="outlined"
-                          fullWidth
-                          size="small"
-                        >
-                          <InputLabel
-                            style={{
-                              backgroundColor: "white",
-                              paddingLeft: "2px",
-                              paddingRight: "2px"
-                            }}
-                          >
-                            Material Name
-                        </InputLabel>
-                          <Select
-                            variant="outlined"
-                            required
-                            name="Raw_Material_Id"
-                            value={this.state.Raw_Material_Id}
-                            onChange={event => {
-                              let materialCode;
-                              this.state.materials.map(material => {
-                                if (material._id === event.target.value) {
-                                  materialCode = material.raw_material_code;
-                                  console.log("code: ", materialCode);
-                                }
-                              });
-                              this.setState({
-                                Raw_Material_Id: event.target.value,
-                                Raw_Material_Code: materialCode
-                              });
-                            }}
-                          >
-                            {this.state.materials.map((material, index) => {
-                              return (
-                                <MenuItem
-                                  //selected
-                                  key={index}
-                                  value={material._id}
-                                >
-                                  {material.raw_material_name}
-                                </MenuItem>
-                              );
-                            })}
-                          </Select>
-                        </FormControl>
-                      )}
                   </Box>
                   <Box width="50%" style={style}>
                     <TextField
@@ -275,9 +155,8 @@ export default class AddWastage extends Component {
                     ></TextField>
                   </Box>
                 </Box>
-
                 <Box style={styles.boxSize2}>
-                  <Box width="50%" style={style} mb={0} mt={0.5}>
+                  <Box width="50%" style={style}>
                     <FormControl
                       required
                       variant="outlined"
@@ -312,7 +191,7 @@ export default class AddWastage extends Component {
                       </Select>
                     </FormControl>
                   </Box>
-                  <Box width="50%" style={style} mb={0} mt={0.5}>
+                  <Box width="50%" style={style}>
                     <FormControl
                       required
                       variant="outlined"
@@ -340,12 +219,6 @@ export default class AddWastage extends Component {
                           console.log(event.target.value);
                         }}
                       >
-                        {/* <MenuItem value="Measuring Unit" disabled>
-                          Measuring Unit
-                        </MenuItem>
-                        <MenuItem value="kg">kg</MenuItem>
-                        <MenuItem value="ltr">ltr</MenuItem>
-                        <MenuItem value="Box">Box</MenuItem> */}
                         {this.state.measuring_units.map(
                           (measuring_unit, index) => {
                             return (
@@ -363,22 +236,19 @@ export default class AddWastage extends Component {
                     </FormControl>
                   </Box>
                 </Box>
-
                 <Box style={styles.boxSize2}>
                   <Box
-                    width="50%"
+                    width="100%"
+                    maxHeight='100px'
                     style={style}
-                    mb={0}
-                    mt={0.5}
-                    // style={styles.box_field}
-                    //padding="10px"
-                    //border="1px solid #3f51b5"
-                    //marginBottom="10px"
                     flexDirection="row"
+                    display="flex"
+                    flexWrap="wrap"
+                    overflow='auto'
                   >
                     {this.state.Id.map((poc, index) => {
                       return (
-                        <Box display="flex">
+                        <Box display="flex" width='33.33%' pt={1}>
                           <TextField
                             size="small"
                             fullWidth
@@ -403,7 +273,11 @@ export default class AddWastage extends Component {
                           {this.state.Id.length === index + 1 ? (
                             <AddBoxOutlinedIcon
                               color="secondary"
-                              fontSize="medium"
+                              style={{
+                                fontSize: "30px",
+                                margin: "4px",
+                                padding: "0px"
+                              }}
                               onClick={() => {
                                 this.setState({});
                                 this.setState(prevState => {
@@ -417,7 +291,12 @@ export default class AddWastage extends Component {
                           ) : (
                               <DeleteOutlineIcon
                                 color="secondary"
-                                fontSize="medium"
+                                style={{
+                                  fontSize: "30px",
+                                  padding: "0px",
+
+                                  margin: "4px"
+                                }}
                                 onClick={() => {
                                   this.setState({});
                                   this.setState(prevState => {
@@ -431,7 +310,9 @@ export default class AddWastage extends Component {
                       );
                     }).reverse()}
                   </Box>
-                  <Box width="50%" style={style} mb={0} mt={0.5}>
+                </Box>
+                <Box style={styles.boxSize2}>
+                  <Box width="100%" style={style}>
                     <Datepick
                       id="4"
                       variant="outlined"
@@ -447,7 +328,7 @@ export default class AddWastage extends Component {
                   </Box>
                 </Box>
                 <Box style={styles.boxSize2}>
-                  <Box width="100%" style={style} mb={0} mt={0.5}>
+                  <Box width="100%" style={style}>
                     <TextField
                       multiline
                       rowsMax="3"
@@ -484,7 +365,7 @@ export default class AddWastage extends Component {
               variant="contained"
               color="primary"
               size="large"
-              fontWeight="Bold"
+              style={{ fontWeight: "bold" }}
               onClick={() => {
                 this.props.cancel();
               }}
@@ -497,8 +378,8 @@ export default class AddWastage extends Component {
               fullWidth
               variant="contained"
               color="primary"
+              style={{ fontWeight: "bold" }}
               size="large"
-              fontSize="20px"
               onClick={() => {
                 this.onAddHandler();
               }}

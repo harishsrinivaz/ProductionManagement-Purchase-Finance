@@ -1,16 +1,12 @@
 const mongoose = require("mongoose");
 const Wastage_Schema = mongoose.Schema({
-  Wastage_Type: {
+  Raw_Material_Id: {
     type: String,
     required: true
   },
-  Product_Name: {
-    type: String
-    // required: true
-  },
-  Raw_Material_Id: {
-    type: String
-    // required: true
+  Raw_Material_Code: {
+    type: String,
+    required: true
   },
   Quantity: {
     type: Number,
@@ -35,9 +31,9 @@ const Wastage_Schema = mongoose.Schema({
   },
   date: { type: Date, default: Date.now }
 });
-const Production_Wastages = mongoose.model(
-  "Production_Wastages",
+const Purchase_Wastages = mongoose.model(
+  "purchase_wastages",
   Wastage_Schema
 );
 
-module.exports = Production_Wastages;
+module.exports = Purchase_Wastages;

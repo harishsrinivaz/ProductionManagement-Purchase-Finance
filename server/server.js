@@ -23,5 +23,6 @@ app.use('/logs', require('./Routes/LogsRoute'))
 app.use('/measuring-unit', require('./Routes/measuringUnit'))
 app.use('/files', require('./Routes/FilesRoute'))
 app.use('/purchase-stocks', require('./Routes/PurchaseStocksRoute'))
+app.use('/purchase-wastages', require('./Routes/PurchaseWastagesRoute'))
 
 app.listen(PORT, () => { console.log('Server running...') }) 
