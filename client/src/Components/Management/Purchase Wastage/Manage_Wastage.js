@@ -109,11 +109,12 @@ export default class ManageWastage extends Component {
         width="80%"
         display="flex"
         alignItems="center"
+        justifyContent='center'
         flexDirection="column"
         height="100vh"
       >
         <Box fontSize="30px" mb={3} fontWeight="bold">
-          Manage Wastage
+          Wastage Details
         </Box>
         <Box display="flex" alignSelf="start">
           <Button

@@ -17,16 +17,29 @@ export default class ManageProductStock extends Component {
       ],
       data: [],
       materialList: [],
-      unitList: []
+      unitList: [],
+      reqDetails: [],
+      stockDetails: []
     };
 
-    this.getMaterialName = (id) => {
+    this.getMaterialDetails = (id, field) => {
       let temp = id;
-      this.state.materialList.map(material => {
-        if (material._id === id) {
-          temp = material.raw_material_name;
-        }
-      })
+      if (field === 'name') {
+        this.state.materialList.map(material => {
+          if (material._id === id) {
+            console.log('name called')
+            temp = material.raw_material_name;
+          }
+        })
+      }
+      else {
+        this.state.materialList.map(material => {
+          if (material._id === id) {
+            console.log('code called')
+            temp = material.raw_material_code;
+          }
+        })
+      }
       return temp;
     }
 
@@ -38,6 +51,43 @@ export default class ManageProductStock extends Component {
         }
       })
       return temp;
+    }
+
+    this.getDetails = (id, field) => {
+      let temp = id;
+      console.log('reqdetails:', this.state.reqDetails)
+      this.state.reqDetails.map(details => {
+        if (details._id === id) {
+          temp = this.getMaterialDetails(details.Raw_Material_Id, field);
+        }
+      })
+      return temp;
+    }
+
+    this.getFullDetails = id => {
+      let temp = [];
+      console.log('fulldetails called')
+      this.state.reqDetails.map(details => {
+        if (details._id === id) {
+          temp = details;
+        }
+      })
+      return temp;
+    }
+
+    this.loadDetails = () => {
+      let temp = [];
+      console.log('fulldetails: ', this.state.stockDetails)
+      for (let i = 0; i < this.state.stockDetails[0].stock.length; i++) {
+        this.state.stockDetails[0].stock[i].Purchase_List.map(id => {
+          let str = this.getFullDetails(id);
+          console.log(id)
+          temp.push(str);
+        })
+      }
+      this.setState({
+        data: temp
+      })
     }
 
     this.callDetails = () => {
@@ -59,23 +109,29 @@ export default class ManageProductStock extends Component {
       })
 
       axios.get('/request-details').then(res => {
-        let temp = [];
-        console.log('Details: ', res.data)
-        for (let i = 0; i < res.data.length; i++) {
-          if (res.data[i].Status === "Purchase-Completed") {
-            console.log(res.data[i].Status)
-            res.data[i].Raw_Material_Id = this.getMaterialName(res.data[i].Raw_Material_Id);
-            res.data[i].Measuring_Unit = this.getUnit(res.data[i].Measuring_Unit)
-            console.log('rm: ', res.data[i].Raw_Material_Id)
-            temp.push(res.data[i]);
-          }
-        }
         this.setState({
-          data: temp
+          reqDetails: [...res.data]
         })
+        axios.get('/purchase-stocks').then(res => {
+          let temp = [];
+          console.log('Stocks: ', res.data.stock)
+          for (let i = 0; i < res.data.stock.length; i++) {
+            res.data.stock[i].Raw_Material_Id = this.getDetails(res.data.stock[i].Purchase_Id, "name")
+            res.data.stock[i].Raw_Material_Code = this.getDetails(res.data.stock[i].Purchase_Id, "code")
+            res.data.stock[i].Measuring_Unit = this.getUnit(res.data.stock[i].Measuring_Unit)
+            console.log('rm: ', res.data.stock[i].Total_Quantity)
+            temp.push(res.data.stock[i]);
+          }
+          this.setState({
+            data: temp,
+            stockDetails: [res.data]
+          })
+        })
+      }).catch(err => {
+        console.log('cannot get reqDetails', err)
       })
-    }
 
+    }
   }
   componentDidMount() {
     this.callDetails();
@@ -86,32 +142,21 @@ export default class ManageProductStock extends Component {
         width="80%"
         display="flex"
         alignItems="center"
+        justifyContent="center"
         flexDirection="column"
         height="100vh"
       >
         <Box fontSize="30px" mb={8} fontWeight="bold ">
-          Manage Product Stock
+          Raw Material Stock Details
         </Box>
-        {/* <Box display="flex" alignSelf="start">
+        {/* <Box display='flex' justifyContent='flex-start' width='100%' pb={2}>
           <Button
-            variant="contained"
-            color="primary"
-            style={{
-              marginBottom: "20px",
-              display: "flex",
-              marginRight: "10px"
-            }}
-            size="large"
-            onClick={() => {
-              this.setState({
-                openAdd: true
-              });
-            }}
-          >
-            Add
-          </Button>
+            variant='contained'
+            color='primary'
+            size='small'
+            onClick={this.loadDetails}
+          >Stock added Details</Button>
         </Box> */}
-
         <MaterialTable
           title=" "
           columns={this.state.columns}

@@ -132,8 +132,18 @@ class Add_Purchase_Stock extends Component {
                             Measuring_Unit: this.props.Purchase.Measuring_Unit,
                             Total_Quantity: res.data
                         }).then(res => {
-                            console.log(res);
+                            // console.log(res);
+                            // axios.post('/purchase-stocks/add-production', {
+                            //     _id: this.props.Purchase._id,
+                            //     Raw_Material_Id: this.props.Purchase.Raw_Material_Id,
+                            //     Raw_Material_Code: this.props.Purchse.Raw_Material_Code,
+                            //     Quantity: this.props.Purchase.Quantity,
+                            //     Measuring_Unit: this.props.Purchase.Measuring_Unit
+                            // }).then(response => {
                             this.props.closeDialog();
+                            // }).catch(err => {
+                            //     console.log('stock not reduced', err)
+                            // })
                         }).catch(err => {
                             console.log('Stock not added', err)
                         })
@@ -404,6 +414,7 @@ class Add_Purchase_Stock extends Component {
                             style={{ display: 'none' }}
                             id="#file2"
                             type='file'
+                            accept='image/*,application/pdf'
                             multiple='multiple'
                             onChange={(event) => {
                                 let temp = event.target.files;

@@ -337,16 +337,6 @@ export default class EditPurchase extends Component {
                       variant="outlined"
                       label="Quantity"
                       required
-                      inputProps={{
-                        style: {
-                          color: 'black'
-                        }
-                      }}
-                      InputLabelProps={{
-                        style: {
-                          color: 'black'
-                        }
-                      }}
                       value={this.state.Quantity}
                       onChange={event => {
                         this.setState({
@@ -367,7 +357,6 @@ export default class EditPurchase extends Component {
                           backgroundColor: "white",
                           paddingLeft: "2px",
                           paddingRight: "2px",
-                          color: 'black'
                         }}
                       >
                         Measuring Unit
@@ -378,7 +367,6 @@ export default class EditPurchase extends Component {
                         variant="outlined"
                         required
                         value={this.state.Measuring_Unit}
-                        style={{ color: 'black' }}
                         onChange={event => {
                           this.setState({
                             Measuring_Unit: event.target.value
@@ -416,7 +404,6 @@ export default class EditPurchase extends Component {
                           backgroundColor: "white",
                           paddingLeft: "2px",
                           paddingRight: "2px",
-                          color: 'black'
                         }}
                       >
                         Vendor Name
@@ -426,7 +413,6 @@ export default class EditPurchase extends Component {
                         variant="outlined"
                         required
                         name="Vendor"
-                        style={{ color: 'black' }}
                         value={this.state.Vendor}
                         onChange={event => {
                           this.setState({
@@ -456,16 +442,6 @@ export default class EditPurchase extends Component {
                       variant="outlined"
                       label="Total_Price"
                       required
-                      InputLabelProps={{
-                        style: {
-                          color: 'black'
-                        }
-                      }}
-                      inputProps={{
-                        style: {
-                          color: 'black'
-                        }
-                      }}
                       value={this.state.Total_Price}
                       onChange={event => {
                         this.setState({
@@ -537,7 +513,6 @@ export default class EditPurchase extends Component {
                           backgroundColor: "white",
                           paddingLeft: "2px",
                           paddingRight: "2px",
-                          color: 'black'
                         }}
                       >
                         Status
@@ -547,7 +522,6 @@ export default class EditPurchase extends Component {
                         variant="outlined"
                         required
                         name="Status"
-                        style={{ color: 'black' }}
                         value={this.state.Status}
                         onChange={event => {
                           this.setState({
@@ -568,11 +542,6 @@ export default class EditPurchase extends Component {
                       variant="outlined"
                       fullWidth
                       label="Comment"
-                      InputLabelProps={{
-                        style: {
-                          color: 'black'
-                        }
-                      }}
                       value={this.state.Comments}
                       onChange={event => {
                         this.setState({
@@ -591,6 +560,7 @@ export default class EditPurchase extends Component {
                   >
                     <input
                       style={{ display: 'none' }}
+                      accept='image/*,application/pdf'
                       id="#file"
                       type='file'
                       multiple='multiple'
@@ -656,7 +626,7 @@ export default class EditPurchase extends Component {
               {this.props.disabled.btnText}
             </Button>
           </Box>
-          <Box marginLeft='10px' display={this.state.Vendor !== null ? 'flex' : 'none'}>
+          <Box marginLeft='10px' display={this.state.Vendor !== "" ? 'flex' : 'none'}>
             <Button
               variant="contained"
               color="primary"
