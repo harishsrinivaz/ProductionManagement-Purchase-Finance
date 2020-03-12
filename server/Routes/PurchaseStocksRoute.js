@@ -25,10 +25,11 @@ router.post("/add", (req, res) => {
                         },
                             {
                                 $set: {
-                                    Total_Quantity: new_stock
+                                    Total_Quantity: new_stock,
+                                    Purchase_Id: req.body.Purchase_Id
                                 },
                                 $push: {
-                                    Purchase_List: stockDetails[0]._id
+                                    Purchase_List: req.body.Purchase_Id
                                 }
                             },
                         ).then(Response => {
@@ -98,15 +99,17 @@ router.post("/add", (req, res) => {
 
 router.post("/add-production", (req, res) => {
     const {
+        _id,
         Raw_Material_Id,
         Raw_Material_Code,
         Quantity,
-        Measuring_Unit
+        Measuring_Unit,
+        Id
     } = req.body;
 
     let flag = false;
-    stocks.find({ Purchase_Id: req.body._id }).then(data => {
-        console.log('stock:', data)
+    stocks.find({ Purchase_Id: Id }).then(data => {
+        console.log('stock:', req.body)
         let stockReduce = data[0].Total_Quantity -= req.body.Quantity;
         if (stockReduce < 0) {
             stockReduce = 0;
@@ -131,6 +134,11 @@ router.post("/add-production", (req, res) => {
                                 $set: {
                                     Quantity: new_stock
                                 }
+                            },
+                            {
+                                $push: {
+                                    Id: _id
+                                }
                             }
                         )
                             .then(stock_Quantity => {
@@ -148,15 +156,14 @@ router.post("/add-production", (req, res) => {
                                     Raw_Material_Id,
                                     Raw_Material_Code,
                                     Quantity,
-                                    Measuring_Unit
-                                    // Id_Type,
-                                    // Id: []
+                                    Measuring_Unit,
+                                    Id
                                 }
                             );
                             new_Production_Raw_Material_Stock
                                 .save()
                                 .then(Production_Raw_Material_Stock => {
-                                    res.send('Stock added')
+                                    return res.send('Stock added')
                                     console.log("stock added");
                                 });
                         }

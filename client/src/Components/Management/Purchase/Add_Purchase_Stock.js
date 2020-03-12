@@ -39,7 +39,7 @@ class Add_Purchase_Stock extends Component {
             file: [],
             Id: [{ id: "" }],
             a_id: '',
-            idType: null
+            idType: ""
         }
         this.loadStatus = () => {
             let status = [
@@ -107,9 +107,10 @@ class Add_Purchase_Stock extends Component {
                 alert('Some fields contain invalid value!')
             }
             else {
+                let date = Date.now();
                 const formData = new FormData();
                 for (let i = 0; i < this.state.file.length; i++) {
-                    formData.append('file', this.state.file[i]);
+                    formData.append('file', this.state.file[i], "i" + date + "-" + this.state.file[i].name);
                 }
                 axios.post('/files', formData, {
                     headers: {
@@ -123,27 +124,29 @@ class Add_Purchase_Stock extends Component {
                         Invoice_Amount: this.state.invoice_amount,
                         Invoice_Date: this.state.invoice_date,
                         Invoice_Document: file.data,
-                        Id_Type: this.state.Id_Type,
+                        Id_Type: this.state.idType,
                         Id: this.state.Id,
                         Status: this.state.status
                     }).then(res => {
                         axios.post('/purchase-stocks/add', {
+                            Purchase_List: this.props.Purchase._id,
                             Purchase_Id: this.props.Purchase._id,
                             Measuring_Unit: this.props.Purchase.Measuring_Unit,
                             Total_Quantity: res.data
-                        }).then(res => {
-                            // console.log(res);
-                            // axios.post('/purchase-stocks/add-production', {
-                            //     _id: this.props.Purchase._id,
-                            //     Raw_Material_Id: this.props.Purchase.Raw_Material_Id,
-                            //     Raw_Material_Code: this.props.Purchse.Raw_Material_Code,
-                            //     Quantity: this.props.Purchase.Quantity,
-                            //     Measuring_Unit: this.props.Purchase.Measuring_Unit
-                            // }).then(response => {
-                            this.props.closeDialog();
-                            // }).catch(err => {
-                            //     console.log('stock not reduced', err)
-                            // })
+                        }).then(stock => {
+                            axios.post('/purchase-stocks/add-production', {
+                                _id: this.props.Purchase._id,
+                                Raw_Material_Id: this.props.Purchase.Raw_Material_Id,
+                                Raw_Material_Code: this.props.Purchase.Raw_Material_Code,
+                                Quantity: this.props.Purchase.Quantity,
+                                Measuring_Unit: this.props.Purchase.Measuring_Unit,
+                                Id: this.props.Purchase._id
+                            }).then(response => {
+                                console.log('response: ', response)
+                                this.props.closeDialog();
+                            }).catch(err => {
+                                console.log('stock not reduced', err)
+                            })
                         }).catch(err => {
                             console.log('Stock not added', err)
                         })

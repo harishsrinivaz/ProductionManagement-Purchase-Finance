@@ -60,10 +60,12 @@ export default class EditPurchase extends Component {
 
     this.onEditHandler = () => {
       this.checkTo();
+      let date = Date.now();
       const formData = new FormData();
       console.log('fileLength: ', this.state.file)
       for (let i = 0; i < this.state.file.length; i++) {
-        formData.append('file', this.state.file[i]);
+        let file = this.state.file[i]
+        formData.append('file', this.state.file[i], "q" + date + "-" + this.state.file[i].name);
       }
       axios.post('/files', formData, {
         headers: {

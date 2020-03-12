@@ -2,6 +2,8 @@ const reqDetails = require('../Models/Request_Details');
 const express = require('express');
 const router = express.Router();
 const fileUpload = require('express-fileupload');
+const date = new Date();
+
 router.use(fileUpload());
 
 router.get('/', (req, res) => {
@@ -11,11 +13,10 @@ router.get('/', (req, res) => {
 })
 
 router.post('/', (req, res) => {
-
     if (req.files) {
         const file = req.files.file;
         var storeFile = [];
-        console.log('File received');
+        console.log('File received:', file);
         if (file.length) {
             for (let i = 0; i < file.length; i++) {
                 file[i].mv(`${__dirname}/../../client/src/file storage/${file[i].name}`, err => {
@@ -32,8 +33,9 @@ router.post('/', (req, res) => {
         }
         else {
             file.mv(`${__dirname}/../../client/src/file storage/${file.name}`, err => {
-                if (err) res.send(err)
+                if (err) { console.log(err); res.send(err) }
                 else {
+                    console.log("date: ", file)
                     res.send(file.name)
                 }
             })
